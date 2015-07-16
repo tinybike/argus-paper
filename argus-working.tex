@@ -1,0 +1,95 @@
+% !TEX program = xelatex
+\documentclass[11pt,a4paper]{article}
+\usepackage{polyglossia}
+\usepackage{fontspec}
+\usepackage{subfig}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage[round]{natbib}
+
+% natbib link joining; somewhat breaks \cite, \citet
+\makeatletter
+\renewcommand\hyper@natlinkbreak[2]{#1}
+\makeatother
+
+\usepackage{geometry}
+\geometry{%
+	includeheadfoot,
+	margin=1in
+}
+
+\def\TODO{{\bf ??? }}
+
+\title{Argus: Deciding Questions about Events \\ (working paper)}
+\author{Petr Baudiš \\ Ailao}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}%
+	We consider the problem of reliably answering yes/no questions
+	about events based on news sources in settings of the Argus QA
+	system and the Syphon question pre-validator.
+	We give a brief overview of the relevant state-of-art methods
+	in the academic field of Natural Language Processing,
+	requirements for building a solid state-of-art system
+	and difficulties we may anticipate in the road ahead.
+	Based on this, we propose a basic architecture of the Argus
+	system, roadmap to achieve baseline performance, and a basic
+	version of the Syphon system.
+\end{abstract}
+
+\vspace{3ex}
+
+{\itshape
+
+In the working paper you should be sure to highlight the key aspects of uncertainty and anticipated difficulty.
+	
+And also, of course, the need for +alpha development - to whatever extent you
+can detail what specifically is known and unknown that future development would
+help clarify. Bringing in +that recent Cornell research might also be helpful
+if you consider it valid (I know you were kind of skeptical of it).
+
+Another thing I neglected to mention - I know they're not exactly the same, but it would also be very good to whatever extent you can to
+point to YodaQA as a kind of preliminary proof of concept and include any mention you can of the lessons learned from building that and how those
+lessons would/might come in to play with building the "yes/no/unclear" Argus option.
+}
+
+about us.  yodaqa.
+
+paper outline.
+
+\section{QA System in Machine Learning Concept}
+
+dataset
+
+performance measures
+
+initial targets
+
+\section{Machine Learning for Answering Yes/No Questions}
+
+yes/no questions == text entailment (of question and its negation).
+
+\section{Structure of Our Problem}
+
+concrete system proposal.
+
+question classes.
+
+anticipated difficulties.
+
+\section{How Can We Know What Do We Know?}
+
+syphon outline.
+
+\section{Infrastructure}
+
+news gathering etc.
+
+distributed system prospects.
+
+\bibliographystyle{plainnat}
+\bibliography{qa}
+
+\end{document}
