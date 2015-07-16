@@ -20,7 +20,7 @@
 
 \def\TODO{{\bf ??? }}
 
-\title{Argus: Deciding Questions about Events \\ (working paper)}
+\title{Argus: Deciding Questions about Events \\ (working paper) [DRAFT]}
 \author{Petr Baudiš \\ Ailao}
 
 \begin{document}
@@ -55,35 +55,184 @@ point to YodaQA as a kind of preliminary proof of concept and include any mentio
 lessons would/might come in to play with building the "yes/no/unclear" Argus option.
 }
 
-about us.  yodaqa.
+Our team at the Ailao startup, based at the 3C Group FEE CTU,
+is composed of people working at the boundary of academic and commercial
+sector and with a history of projects that involve
+various aspects of Natural Language Processing ---
+information retrieval, web scraping and information extraction,
+deep learning and, most prominently in this context, question answering.
+Our flagship project is the YodaQA system for answering factoid questions,
+but we also built systems for automatic tagging of newsreel messages
+or answering multiple-choice entrance exam type questions.
 
-paper outline.
+A natural question is whether we could simply apply our YodaQA system
+on this task.  However, while there are some common analysis elements,
+generating factoid answers is programatically quite a different task
+from deciding whether a sentence is correct or incorrect.%
+\footnote{A baseline support for answering yes / no questions is currently
+under development within YodaQA, but it is not finished yet and not meant
+to be highly reliable at this point.}
+We believe the most efficient approach to take for a prototype is thus
+to build a system from scratch, reusing mainly our expertise and possibly
+some isolated external components (e.g.\ database interfaces or NLP annotators).
 
-\section{QA System in Machine Learning Concept}
+The rest of the paper is structured as follows.
+In Sec.~\ref{qaml}, we rehash what does it involve to build Natural Language Processing
+system that uses machine learning and is rigorously developed and measured.
+In Sec.~\ref{ynml}, we look at current scientific concepts that relate
+to the yes/no QA task at hand, and at their performance.
+In Sec.~\ref{structure}, we explore the yes/no QA task in more detail,
+identifying different types of questions and how to tackle each.
+As a corollary, we explain how to sort the easy from the difficult
+even before attempting an answer in Sec.~\ref{syphon}.
+We sketch the system and its main concrete strategies based on these
+ingredients in Sec.~\ref{system}.
+Lastly in the Sec.~\ref{infra}, we give an overview of
+the boring but most essential part of the system --- the infrastructure
+that collects and manages our data, runs the experiments and interacts with the user.
 
-dataset
+\section{QA System in Machine Learning Context}
+\label{qaml}
 
-performance measures
+When building an NLP system that uses machine learning components,
+we need a rigorous way to (i) train these components, and (ii) evaluate
+the system performance.
 
-initial targets
+Our NLP system is a \textit{classifier}, i.e.\ a program that takes
+a sentence (and a large knowledge base) and classifies it as either
+true or false.  The typical approach in such a scenario is building
+a \textit{gold standard} dataset --- a set of questions, each annotated
+with the correct answer (yes, no, unknown) and an accompanying knowledge
+base that should, on its own, lend support to deciding these questions.%
+\footnote{With a large enough knowledge base, this issue tends to vanish,
+of course.}
+
+In general, the bigger the dataset, the better.  Commonly used datasets
+range in size from low hundreds%
+\footnote{E.g.\ the \textit{Curated TREC QA Track Dataset} \url{https://github.com/brmson/dataset-curated-factoid/}}
+to tens of thousands%
+\footnote{E.g.\ the \textit{Large Movie Review Dataset} \url{http://ai.stanford.edu/~amaas/data/sentiment/}}
+but we can certainly grow the dataset as needed and we will be able to identify
+insufficient dataset size as a possible improvement factor during development.
+We should start with at least 100 questions, for initial evaluation of our
+baseline.
+
+These questions are further split, at the very least to a \textit{training}
+set and a \textit{testing} set (more fine splits are often desirable
+with enough questions available).
+To train even simple machine learning models, we should try hard to get
+at least 300 questions, but to train some more advanced models, we need
+to aim at figures like 6000 questions.
+
+To get the dataset, the simplest option is to hire low-paid virtual assistants
+to build it.  Aside of using common employment platforms, Amazon runs a
+so-called Mechanical Turk service that allow humans to be employed easily
+for these kinds of task.  Finally, it might be possible to build the dataset
+semi-automatically by using some clever approaches --- this makes it easy
+to build a large dataset, but holds the danger of noise (non-sensical questions
+or wrong reference answers) and drifting off from realistic questions the
+users will pose.  It would be an interesting problem / milestone on its own,
+but something we might have to tackle.
+
+\textit{Our project proposal assumed that you would deliver such a dataset.
+	We can certainly also arrange building such a dataset, in the vein
+	of future-looking questions you have provided us, as an additionally
+budgeted milestone.}
+
+The main criterium for evaluating our system is obviously \textit{accuracy},
+that is the percentage of questions our system gets right.  However, this
+number does not capture questions where the system ``gives up'' and says
+unknown; one possibility is to use a harmonic average of (i) the percentage
+of questions the system gets right when it decides to answer, and (ii) the
+percentage of questions the system decides to answer.%
+\footnote{This combined percentage is called \textit{F1 score} in machine learning jargon.}
+
+Performance evaluation in the machine learning context has two clear limitations
+that we are not sure how to overcome right now.  First, it is not clear how to
+effectively evaluate Syphon performance when users are repeatedly adjusting
+their queries to force them through; we'll come back to this below.
+Second, we assume a \textit{non-adversarial scenario} where user questions
+are expected to be unbiased and users are not actively trying to trick the system;
+this assumption is not realistic, but we are not aware of any good answers science
+has to this problem.  Out-of-the-loop safeguards like random manual review,
+adaptive Syphon or large-scale consensus of diverse automata might be required.
+Another possibility is that a group of ``white hat'' users will counter-analyze
+trending questions for possible flaws of this nature and natural balance will
+emerge in the ecosystem.
 
 \section{Machine Learning for Answering Yes/No Questions}
+\label{ynml}
 
 yes/no questions == text entailment (of question and its negation).
 
-\section{Structure of Our Problem}
+\textsc{Excitement}
 
-concrete system proposal.
+sentiment analysis
+
+answering sentence selection
+
+comprehension (entrance exam) tasks
+
+\section{Structure of Our Problem}
+\label{structure}
+
+Clearly, not all yes/no questions are created equal:
+Some are easy to understand, others are hard.
+Some are easy to find an answers, others will produce just a smidgen of mentions in the knowledge base.
+Some are quantitatively unclear and answers might be triggerred by published subjective opinions.
+Let us explore what these distinctions mean,
+since recognizing them and rejecting answering
+the hard questions outright is our key to achieving a high precision.
+Fig.~\ref{fig:sampleq} contains a list of sample questions (forward-looking as of now).
 
 question classes.
 
+data sources.
+
 anticipated difficulties.
 
+\begin{figure}
+	\begin{verbatim}
+Did Hillary Clinton become Presidemt?
+Did Scott Walker become US President?
+Did Martin O’Malley become US President?
+Was Obamacare dismantled by the Supreme Court?
+Was Saudi Arabia’s monarchy be dethroned in a coup d’etat?
+Did Iran test detonate a nuclear bomb"
+Did Israel attack Iran?
+Did Germany ban the PEDIGA movement?
+Did the US dollar collapse by at least 50\%?
+Did the euro collapse another 50\%?
+Did Germany abandon the euro?
+Did the EU slide into a new recession?
+Was a miracle cure for diabetes discovered?
+Did a real blizzard lead to power cuts for more than 10 million Americans?
+Did Sears declare bankruptcy?
+	\end{verbatim}
+	\label{fig:sampleq}
+	\caption{Sample questions as provided by the customer.}
+\end{figure}
+
+To illustrate, of the example questions (thanks a lot for these!), some like the presidency ones are of course not so difficult. However, e.g. "Did the euro collapse another 50\%?" is not something the system can gleam out of things others wrote as there is unlikely to be a particular story on euro value change between the two particular time points we want; "Did a real blizzard lead to power cuts for more than 10 million Americans?" needs to do inference from headlines about "5 million" or "15 million". It is easy to add particular individual rules for these cases, but then we would end up having to do great many particular rules!
+
 \section{How Can We Know What Do We Know?}
+\label{syphon}
 
 syphon outline.
 
+\section{A Concrete Proposal}
+\label{system}
+
+concrete system proposal.
+
+initial knowledge base: guardian api? wikidata?
+
+search method: named entities, wikipedia aliases
+
+baseline method: bag-of-words. deep anssentsel?
+
 \section{Infrastructure}
+\label{infra}
 
 news gathering etc.
 
