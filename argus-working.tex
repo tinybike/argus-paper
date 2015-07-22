@@ -70,8 +70,15 @@ on this task.  However, while there are some common analysis elements,
 generating factoid answers is programatically quite a different task
 from deciding whether a sentence is correct or incorrect.%
 \footnote{A baseline support for answering yes / no questions is currently
-under development within YodaQA, but it is not finished yet and not meant
-to be highly reliable at this point.}
+under development within YodaQA as a student internship project, but it is
+not finished yet and not meant to be highly reliable at this point.
+The initial proposed method is at
+\url{https://github.com/brmson/yodaqa/blob/f/textent/doc/ENTAILMENT.md}
+but the difference from our scenario is that we are answering questions
+on top of a fixed knowledge base, mainly structured one, rather than an
+evolving news stream.  The baseline techniques are also so simple that
+reusing implementation wouldn't help that much --- but reusing experience
+definitely will.}
 We believe the most efficient approach to take for a prototype is thus
 to build a system from scratch, reusing mainly our expertise and possibly
 some isolated external components (e.g.\ database interfaces or NLP annotators).
@@ -170,7 +177,9 @@ has to this problem.  Out-of-the-loop safeguards like random manual review,
 adaptive Syphon or large-scale consensus of diverse automata might be required.
 Another possibility is that a group of ``white hat'' users will counter-analyze
 trending questions for possible flaws of this nature and natural balance will
-emerge in the ecosystem.
+emerge in the ecosystem --- the motivation of these users being reputation and
+credentials (user rating might be an excellent base for getting hired as a
+proprietary analyst), or even bounties for bad questions.
 
 \section{Machine Learning for Answering Yes/No Questions}
 \label{ynml}
@@ -322,6 +331,8 @@ Deep anssentsel would be easy, but needs a dataset of at least a few thousand qu
 
 \section{Infrastructure}
 \label{infra}
+
+technical details --- python, database used, etc.
 
 news gathering etc.
 
