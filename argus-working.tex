@@ -134,6 +134,13 @@ or wrong reference answers) and drifting off from realistic questions the
 users will pose.  It would be an interesting problem / milestone on its own,
 but something we might have to tackle.
 
+Many of the models need another kind of dataset as well --- pairs of question
+and news sentence that are annotated by whether the sentence carries the yes/no
+answer for the question.  However, from a purely question-based dataset,
+generating a medium-quality dataset like this should be straightforward,
+and reviewing predefined annotations by humans is much easier and faster
+than creating the annotations in the first place.
+
 \textit{Our project proposal assumed that you would deliver such a dataset.
 	We can certainly also arrange building such a dataset, in the vein
 	of future-looking questions you have provided us, as an additionally
@@ -146,6 +153,11 @@ unknown; one possibility is to use a harmonic average of (i) the percentage
 of questions the system gets right when it decides to answer, and (ii) the
 percentage of questions the system decides to answer.%
 \footnote{This combined percentage is called \textit{F1 score} in machine learning jargon.}
+We can always change the threshold of confidence the system uses to decide
+whether to answer to keep the accuracy of answered questions at the desired
+score like 95\%, the caveat is that the system may refuse to answer almost
+all questions at that point; therefore, this average metric is a better
+option for judging the system performance.
 
 Performance evaluation in the machine learning context has two clear limitations
 that we are not sure how to overcome right now.  First, it is not clear how to
@@ -163,6 +175,9 @@ emerge in the ecosystem.
 \section{Machine Learning for Answering Yes/No Questions}
 \label{ynml}
 
+Preface: The success of vector embeddings, word2vec.
+However, named entity troubles.
+
 yes/no questions == text entailment (of question and its negation).
 
 \textsc{Excitement}
@@ -176,23 +191,8 @@ comprehension (entrance exam) tasks
 \section{Structure of Our Problem}
 \label{structure}
 
-Clearly, not all yes/no questions are created equal:
-Some are easy to understand, others are hard.
-Some are easy to find an answers, others will produce just a smidgen of mentions in the knowledge base.
-Some are quantitatively unclear and answers might be triggerred by published subjective opinions.
-Let us explore what these distinctions mean,
-since recognizing them and rejecting answering
-the hard questions outright is our key to achieving a high precision.
-Fig.~\ref{fig:sampleq} contains a list of sample questions (forward-looking as of now).
-
-question classes.
-
-data sources.
-
-anticipated difficulties.
-
 \begin{figure}
-	\begin{verbatim}
+\begin{verbatim}
 Did Hillary Clinton become Presidemt?
 Did Scott Walker become US President?
 Did Martin O’Malley become US President?
@@ -208,28 +208,117 @@ Did the EU slide into a new recession?
 Was a miracle cure for diabetes discovered?
 Did a real blizzard lead to power cuts for more than 10 million Americans?
 Did Sears declare bankruptcy?
-	\end{verbatim}
-	\label{fig:sampleq}
+\end{verbatim}
 	\caption{Sample questions as provided by the customer.}
+	\label{fig:sampleq}
 \end{figure}
 
-To illustrate, of the example questions (thanks a lot for these!), some like the presidency ones are of course not so difficult. However, e.g. "Did the euro collapse another 50\%?" is not something the system can gleam out of things others wrote as there is unlikely to be a particular story on euro value change between the two particular time points we want; "Did a real blizzard lead to power cuts for more than 10 million Americans?" needs to do inference from headlines about "5 million" or "15 million". It is easy to add particular individual rules for these cases, but then we would end up having to do great many particular rules!
+Clearly, not all yes/no questions are created equal:
+Some are easy to understand, others are hard.
+Some are easy to find an answers, others will produce just a smidgen of mentions in the knowledge base.
+Some are quantitatively unclear and answers might be triggerred by published subjective opinions.
+Let us explore what these distinctions mean,
+since recognizing them and rejecting answering
+the hard questions outright is our key to achieving a high precision.
+Fig.~\ref{fig:sampleq} contains a list of sample questions (forward-looking as of now).
+
+Let us group the questions to several classes in terms of how easy to automatically judge they are:
+
+\begin{itemize}
+	\item Clear-cut questions: \textbf{Did X Y become President?},
+		\textbf{Did Iran test detonate a nuclear bomb?},
+		\textbf{Did Germany ban the PEDIGA movement?}
+
+		These should be generally easy to parse by Syphon
+		and to answer unambiguously from news sources.
+
+	\item Fuzzy-matching questions: \textbf{Was Saudi Arabia’s monarchy be dethroned in a coup d’etat?}
+		\textbf{Did Germany abandon the euro?},
+		\textbf{Did Sears declare bankruptcy?}
+
+		These are about unambiguous facts and should pass Syphon,
+		but simple text matching strategies might fail when
+		answering the question - the system needs to match
+		``revolution'' to ``dethroned in a coup d'etat'',
+		many news titles would use ``leave the eurozone''
+		instead of ``abandon the euro'' and ``declare bankrupcy''
+		is the same as e.g.\ ``go bankrupt''.
+
+		Based on results like TODO,
+		we can predict that many of the simpler paraphrases
+		would be covered by vector embeddings%
+\footnote{There is also a Wordnet dictionary that covers many synonymic relationships of individual words, but extending it to verb/noun combinations is less trivial.}
+		but this is unlikely to solve the ``abandon the euro''.
+		We can either rely on stricter Syphon
+		(we could suggest templates like ``starts'' and ``stops''
+		together with knowledge base attributes),
+		or simply hope that the newspapers will use so varied
+		phrasings that the one particularly in the question
+		will still appear often enough; the alpha prototype
+		should shed more light on this.
+
+		Also, another tricky part is that \textbf{Sears} is name
+		of many legal entities; do we mean the department store
+		chain, \textbf{Sears Holdings} or some sister company?
+		However, Syphon can catch ambiguous references like this.
+
+	\item Questions requiring inference: \textbf{Did the US dollar collapse by at least 50\%?},
+		\textbf{Did the euro collapse another 50\%?},
+		\textbf{Did a real blizzard lead to power cuts for more than 10 million Americans?}
+
+		Answering these questions with simple text matching
+		is unlikely to produce any results.  Syphon shouldn't
+		be able to decompose this question to simple elements
+		and relationships between these and so shouldn't let
+		pass these questions through.
+
+	\item Subjective questions: \textbf{Was Obamacare dismantled by the Supreme Court?},
+		\textbf{Did Israel attack Iran?},
+		\textbf{Did the EU slide into a new recession?},
+		\textbf{Was a miracle cure for diabetes discovered?}
+
+		These questions are particularly tricky as filtering
+		them with Syphon may be problematic.  Entity X attacking
+		entity Y seems quite unambiguous and well-defined.
+		On the other hand, the definition of ``attack'' may
+		vary widely\footnote{Israel is a good example as the country is known for executing military and intelligence operations covertly and avoiding admission of involvement.} --- from bombing of specific site
+		to a full-scale military attack.
+
+		We don't have a good solution to this class of questions,
+		except warning users that the act of ``dismantling''
+		simply means that enough commentators consider the court
+		judgement to be this, the same with ``recession'' or what
+		is a ``miracle cure'' (we already have several, or none).
+\end{itemize}
+
+data sources: news sites, knowledge bases (wikidata).
 
 \section{How Can We Know What Do We Know?}
 \label{syphon}
 
-syphon outline.
+syphon brief outline.
+
+two roles: reject bad entities, provide system interpretation and show
+it along with the question for other users.
+
+named entity search method: named entities, wikipedia aliases
+
+clearly identify concepts, relationships.  in case of doubt, reject.
+
+output: set of named entities or concept vectors, relationship words.
 
 \section{A Concrete Proposal}
 \label{system}
 
-concrete system proposal.
+Concrete system proposal: Syphon that detects named entities (enwiki titles) and verbs, rejects if anything extra is present.
+Get pre-processed version from syphon.
+Scan news titles (and possibly structured databases), model entailment (yes, unknown, now) for each,
+use relative counts (normalized by general named entity occurrence) to estimate probability.
 
 initial knowledge base: guardian api? wikidata?
 
-search method: named entities, wikipedia aliases
-
-baseline method: bag-of-words. deep anssentsel?
+baseline entailment method: bag-of-words, use Wordnet synsets.
+Deep anssentsel would be easy, but needs a dataset of at least a few thousand question, sentence pairs - use multitask learning?
 
 \section{Infrastructure}
 \label{infra}
