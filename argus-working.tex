@@ -246,6 +246,12 @@ The most prominent effort in this area is probably the
 which is a full-fledged
 RTE pipeline in Java that implements several algorithms
 in a common framework.
+Typical state-of-art RTE algorithms work on the principle of parse tree
+alignment --- grammar dependency tree of the hypothesis and each context
+sentence is compared and we try to learn which changes in the tree might
+keep entailment.
+But as the RTE problems are quite hard and practical applications are limited,
+this is not a very lively area of research per se.
 
 In the RTE field jargon, the Argus task is to detect whether either the question or
 its negation is entailed from a given text article.  This involves
@@ -271,8 +277,12 @@ the relevant passages.
 	\textbf{Context:} The sale was made to pay Yukos' US\$ 27.5 billion tax bill, Yuganskneftegaz was originally sold for US\$ 9.4 billion to a little known company Baikalfinansgroup which was later bought by the Russian state-owned oil company Rosneft. \\
 	\textbf{Hypothesis:} Baikalfinansgroup was sold to Rosneft.
 
+	\vspace{2ex}
+
 	\textbf{Context:} US Steel could even have a technical advantage over Nucor since one new method of steel making it is considering, thin strip casting, may produce higher quality steel than the Nucor thin slab technique. \\
 	\textbf{Hypothesis:} US Steel may invest in strip casting.
+
+	\vspace{2ex}
 
 	\textbf{Context:} The 'Club of Rome' was an appalling Joy Division soundalike band playing in Canberra, Australia in the early 1980's. They were foul, really. Boring, pretentious bunch of shore-starers who struggled to string a tune together, while all the while revelling in the reflected glory of late greats like the Birthday Party. Oh yeah, and they have the same name as some global think tank that deals with a variety of international political issues. \\
 	\textbf{Hypothesis:} The 'Club of Rome' is a global think tank that deals with a variety of international political issues.
@@ -287,16 +297,76 @@ to understanding of written text, but less demanding than the
 full RTE task.  Let us cover a few popular benchmarks:
 
 \begin{itemize}
-	\item \textbf{Sentiment Analysis}
-	\item \textbf{Question Answering}
-	\item \textbf{Question Type Classification}
-	\item \textbf{Answer Sentence Selection}
+	\item \textbf{Sentiment Analysis:} One of the chief benchmarks of
+		language understanding, classifying texts (e.g.\ product
+		reviews) as either positive and negative --- there are
+		abundant datasets, eminent commercial applicability,
+		the problem is very easy to phrase and judge, and yet
+		simple models fail to solve it effectively.%
+\footnote{Consider this utterance with a lot of positive words:
+		\textit{This movie was actually neither that funny, nor super witty.}}
+		The state-of-art (as far as we know) are the Recursive
+		Neural Tensor Networks that model grammar-dependent
+		transformations of vector embeddings, with
+		85.4\% sentences correctly classified as positive or
+		negative on the standard dataset. \cite{SentimentRNTN}
+		A major relevance of this area for us is that detection
+		of long-range negations or even irony is important in
+		sentiment analysis.
+
+	\item \textbf{Question Answering:} The problem we are ourselves
+		tackling is question answering, however the primary focus
+		there is the process of \textit{generating} facts while
+		here we are in the business of \textit{verifying} them.
+		Such a component would be obviously also useful in
+		a question answering system, but e.g.\ in our \textit{YodaQA}
+		system, we do not have such a (working) component yet.
+		IBM Watson DeepQA system (famous from the Jeopardy! competition)
+		has such a component described in \cite{WatsonEvidence};
+		they propose also several simple techniques we plan to
+		use as our baselines.
+
+		Nevertheless, the question answering task is large and
+		consists of many specific sub-tasks.  Let us detail two
+		that would be relevant for us.
+
+	\item \textbf{Question Type Classification:} This task can serve
+		as a demo of state-of-art capability to classify a sentence
+		into a specific category, in this case whether the question
+		is, say, about a number or an entity.  State-of-art approaches
+		(93.2\% accuracy)
+		include neural networks based on vector embeddings \cite{QtcDCNN}.
+
+	\item \textbf{Answer Sentence Selection:} A significant portion
+		of our problem will be identifying news articles
+		and sentences relevant to our questions in large swathes
+		of irrelevant data.  The sentence selection sub-task is
+		about identifying sentences that bear an answer to the
+		given question.%
+\footnote{This is a relatively hard problem; the
+		classifier, given \textit{What does the Peugeot company manufacture?}
+		must select \textit{Peugeot and Rover last month ended an agreement under which Rover distributed Peugeot cars through its dealers in Japan.}
+	but reject \textit{Renault and Peugeot are getting less integrated and becoming primarily designers and assemblers.}}
+		The state-of-art method \cite{Yu2014Deep} uses vector embeddings
+		and when sorting sentences by relevance, achieves a mean rank
+		of about 1.2.%
+\footnote{To clarify, this is a reciprocial of Mean Reciprocial Rank.}
+		We have built our own implementation of this method
+		which reproduces the results and which we could easily
+		reuse in Argus.%
+\footnote{\url{https://github.com/brmson/Sentence-selection}}
+		The downside is that we would need a dataset which has
+		each sentence manually labelled by whether it answers
+		the posed yes/no question.
+
 \end{itemize}
 
 To conclude, the yes/no question answering problem in a scenario that
 would make it easily applicable to Argus has been left almost untackled
 in the literature.  However, several recent benchmarks in related areas
 highlight some techniques which should be highly successful on our task.
+The state-of-art algorithms often involve vector embeddings of words,
+the caveat of which is the requirement of extensively labelled data set.
 
 \section{Structure of Our Problem}
 \label{structure}
