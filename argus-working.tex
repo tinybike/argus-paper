@@ -471,21 +471,50 @@ Let us group the questions to several classes in terms of how easy to automatica
 		is a ``miracle cure'' (we already have several, or none).
 \end{itemize}
 
-data sources: news sites, knowledge bases (wikidata).
+Aside of questions posed, another important aspect is what data sources
+we will use for answering them.  One natural idea which we are working
+with from the beginning is scanning news feeds from a variety of reputable
+news sites and mining answers from natural text.
+However, as an alternative, we could leverage collaboratively maintained
+databases.  The most prominent of these is WikiData, which is becoming the
+base of many infoboxes at Wikipedia and has clear semantic structure.
+We would have to establish some trustworthiness metrics (i.e.\ consider
+only high-profile concepts and require the value to be unchallenged in
+the database for long enough), but the advantage would be a fairly clear
+signal for our system, e.g.\ in the form of clearly valued \textit{currency}
+property for the \textit{Germany} entity.
 
 \section{How Can We Know What Do We Know?}
 \label{syphon}
 
-syphon brief outline.
+The initial phase of the Argus system needs to be the Syphon sub-system
+which carries the role of building up a semantically rich question
+representation from the natural language input, rejecting answers where
+such a representation cannot be unambiguously built, and providing
+some sort of templating and/or auto-completion capabilities for partial
+questions.  Even when a representation is built and passed, an important
+aspect for trustworthiness of the system is that the representation is
+shown (in user-friendly form) to Argus users as a feedback and a clear
+signal of how the system will decide the answers.
 
-two roles: reject bad entities, provide system interpretation and show
-it along with the question for other users.
-
-named entity search method: named entities, wikipedia aliases
-
-clearly identify concepts, relationships.  in case of doubt, reject.
-
-output: set of named entities or concept vectors, relationship words.
+To maintain high precision of answers, the Syphon system should be
+conservative about the questions it allows.  For the baseline system,
+in light of the analysis of question classes above,
+we want to propose a simple Syphon which scans the question
+for named entities%
+\footnote{\textit{Named entity} in NLP parlance is something that is
+	not a plain English word carrying meaning, but e.g.\ a proper
+	name or a numerical value (date, monetary amount, \dots).
+	There exist specialized scanners that extract named entities
+	of specific types; as a simple baseline, we may consider
+	all strings that are titles of Wikipedia articles (or redirects,
+	that is essentially unique aliases).  For example
+	\textit{Hillary Clinton} and \textit{President of the United States}
+	both are titles of such articles.}
+	and verbs which describe clear relationships
+	and verifies that no words without an assigned role remain
+	in the question.  This should keep most of the sample questions
+	covered and with a clear interpretation.
 
 \section{A Concrete Proposal}
 \label{system}
@@ -500,7 +529,7 @@ initial knowledge base: guardian api? wikidata?
 baseline entailment method: bag-of-words, use Wordnet synsets.
 Deep anssentsel would be easy, but needs a dataset of at least a few thousand question, sentence pairs - use multitask learning?
 
-\section{Infrastructure}
+\section{Implementation and Infrastructure}
 \label{infra}
 
 technical details --- python, database used, etc.
