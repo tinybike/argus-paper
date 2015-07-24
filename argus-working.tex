@@ -7,7 +7,7 @@
 \usepackage{hyperref}
 \usepackage[round]{natbib}
 
-% natbib link joining; somewhat breaks \cite, \citet
+% natbib link joining; somewhat breaks \citep, \citept
 \makeatletter
 \renewcommand\hyper@natlinkbreak[2]{#1}
 \makeatother
@@ -230,12 +230,12 @@ or databases available.
 
 A lot of the current research focuses on the best ways to build up
 vector representations of whole sentences and documents --- ranging
-from simple averaging \cite{CNNSentClass,DefGen} (successful baselines)
-to recurrent neural networks \cite{LISA,ShowAndTell}.
+from simple averaging \citep{CNNSentClass,DefGen} (successful baselines)
+to recurrent neural networks \citep{LISA,ShowAndTell}.
 Many applications that rely on semantic understanding of word nuances
 are popping up; this method became state-of-art for machine translation
-\cite{LISA}, automatic image captioning \cite{ShowAndTell} and specific
-types of question answering \cite{QANTA,DefGen,ReadAndComprehend}%
+\citep{LISA}, automatic image captioning \citep{ShowAndTell} and specific
+types of question answering \citep{QANTA,DefGen,ReadAndComprehend}%
 \footnote{The demo at \url{http://45.55.181.170/defgen/} is nice.}.
 One open problem is efficient composition of vector embeddings for
 common words with entities like numbers of proper names.
@@ -317,7 +317,7 @@ full RTE task.  Let us cover a few popular benchmarks:
 		Neural Tensor Networks that model grammar-dependent
 		transformations of vector embeddings, with
 		85.4\% sentences correctly classified as positive or
-		negative on the standard dataset. \cite{SentimentRNTN}
+		negative on the standard dataset. \citep{SentimentRNTN}
 		A major relevance of this area for us is that detection
 		of long-range negations or even irony is important in
 		sentiment analysis.
@@ -330,7 +330,7 @@ full RTE task.  Let us cover a few popular benchmarks:
 		a question answering system, but e.g.\ in our \textit{YodaQA}
 		system, we do not have such a (working) component yet.
 		IBM Watson DeepQA system (famous from the Jeopardy! competition)
-		has such a component described in \cite{WatsonEvidence};
+		has such a component described in \citep{WatsonEvidence};
 		they propose also several simple techniques we plan to
 		use as our baselines.
 
@@ -343,7 +343,7 @@ full RTE task.  Let us cover a few popular benchmarks:
 		into a specific category, in this case whether the question
 		is, say, about a number or an entity.  State-of-art approaches
 		(93.2\% accuracy)
-		include neural networks based on vector embeddings \cite{QtcDCNN}.
+		include neural networks based on vector embeddings \citep{QtcDCNN}.
 
 	\item \textbf{Answer Sentence Selection:} A significant portion
 		of our problem will be identifying news articles
@@ -355,7 +355,7 @@ full RTE task.  Let us cover a few popular benchmarks:
 		classifier, given \textit{What does the Peugeot company manufacture?}
 		must select \textit{Peugeot and Rover last month ended an agreement under which Rover distributed Peugeot cars through its dealers in Japan.}
 	but reject \textit{Renault and Peugeot are getting less integrated and becoming primarily designers and assemblers.}}
-		The state-of-art method \cite{Yu2014Deep} uses vector embeddings
+		The state-of-art method \citep{Yu2014Deep} uses vector embeddings
 		and when sorting sentences by relevance, achieves a mean rank
 		of about 1.2.%
 \footnote{To clarify, this is a reciprocial of Mean Reciprocial Rank.}
@@ -432,7 +432,7 @@ Let us group the questions to several classes in terms of how easy to automatica
 		instead of ``abandon the euro'' and ``declare bankrupcy''
 		is the same as e.g.\ ``go bankrupt''.
 
-		Based on results like \cite{DefGen,QANTA},
+		Based on results like \citep{DefGen,QANTA},
 		we can predict that many of the simpler paraphrases
 		would be covered by vector embeddings%
 \footnote{There is also a Wordnet dictionary that covers many synonymic relationships of individual words, but extending it to verb/noun combinations is less trivial.}
@@ -551,8 +551,8 @@ relationship verb (allowing for synonymes)%
 \footnote{There is a popular NLP database called Wordnet which is
 an excellent machine-readable thesaurus.} and count other words.
 We may try relaxing the Syphon to allow more free-form input and
-use the skip-bigram approach of \cite{WatsonEvidence}.
-A simple algorithm of straight textual alignment of the question and news titles \cite{WatsonEvidence}
+use the skip-bigram approach of \citep{WatsonEvidence}.
+A simple algorithm of straight textual alignment of the question and news titles \citep{WatsonEvidence}
 (using Wordnet for fuzzy matching aain) might be rather rigid,
 but produce a very strong signal when triggered.
 
@@ -577,7 +577,7 @@ of euro being overshadowed by abandonment of mark?}
 
 Improving this further, our first idea would be to obtain a richer annotated
 dataset (either from humans or combining that with some auto-generation
-approaches) and train the deep answer sentence selection model \cite{Yu2014Deep}
+approaches) and train the deep answer sentence selection model \citep{Yu2014Deep}
 that could use vector embeddings to decide entailment; this could both
 raise precision and allow more complex expressions to pass Syphon.%
 \footnote{Performance of this model could be further boosted by using
