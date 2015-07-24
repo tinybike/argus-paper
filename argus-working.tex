@@ -20,7 +20,7 @@
 
 \def\TODO{{\bf ??? }}
 
-\title{Argus: Deciding Questions about Events \\ (working paper) [DRAFT]}
+\title{Argus: Deciding Questions about Events \\ (working paper v1.0)}
 \author{Petr Baudiš \\ Ailao}
 
 \begin{document}
@@ -46,15 +46,17 @@ is composed of people working at the boundary of academic and commercial
 sector and with a history of projects that involve
 various aspects of Natural Language Processing ---
 information retrieval, web scraping and information extraction,
-deep learning and, most prominently in this context, question answering.
-Our flagship project is the YodaQA system for answering factoid questions,
-but we also built systems for automatic tagging of newsreel messages
-or answering multiple-choice entrance exam type questions.
+deep learning, and, most prominently in this context, question answering.
+Our flagship project is the YodaQA system for answering factoid questions,%
+\footnote{\url{http://ailao.eu/yodaqa}}
+but we also built other NLP systems aiming at some level of language understanding,
+like automatic tagging of newsreel messages
+or answering multiple-choice logical entrance exam type questions.
 
 A natural question is whether we could simply apply our YodaQA system
 on this task.  However, while there are some common analysis elements,
 generating factoid answers is programatically quite a different task
-from deciding whether a sentence is correct or incorrect.%
+from deciding whether a sentence is correct or incorrect,%
 \footnote{A baseline support for answering yes / no questions is currently
 under development within YodaQA as a student internship project, but it is
 not finished yet and not meant to be highly reliable at this point.
@@ -65,6 +67,7 @@ on top of a fixed knowledge base, mainly structured one, rather than an
 evolving news stream.  The baseline techniques are also so simple that
 reusing implementation wouldn't help that much --- but reusing experience
 definitely will.}
+as we explain in more detail below.
 We believe the most efficient approach to take for a prototype is thus
 to build a system from scratch, reusing mainly our expertise and possibly
 some isolated external components (e.g.\ database interfaces or NLP annotators).
@@ -72,7 +75,7 @@ some isolated external components (e.g.\ database interfaces or NLP annotators).
 The rest of the paper is structured as follows.
 In Sec.~\ref{qaml}, we rehash what does it involve to build Natural Language Processing
 system that uses machine learning and is rigorously developed and measured.
-In Sec.~\ref{ynml}, we look at current scientific concepts that relate
+In Sec.~\ref{ynml}, we look at the current scientific concepts that relate
 to the yes/no QA task at hand, and at their performance.
 In Sec.~\ref{structure}, we explore the yes/no QA task in more detail,
 identifying different types of questions and how to tackle each.
@@ -84,7 +87,7 @@ Lastly in the Sec.~\ref{infra}, we give an overview of
 the boring but most essential part of the system --- the infrastructure
 that collects and manages our data, runs the experiments and interacts with the user.
 
-\section{QA System in Machine Learning Context}
+\section{QA System in the Machine Learning Context}
 \label{qaml}
 
 When building an NLP system that uses machine learning components,
@@ -107,11 +110,11 @@ to tens of thousands%
 \footnote{E.g.\ the \textit{Large Movie Review Dataset} \url{http://ai.stanford.edu/~amaas/data/sentiment/}}
 but we can certainly grow the dataset as needed and we will be able to identify
 insufficient dataset size as a possible improvement factor during development.
-We should start with at least 100 questions, for initial evaluation of our
+We should start with at least 100 questions for initial evaluation of our
 baseline.
 
-These questions are further split, at the very least to a \textit{training}
-set and a \textit{testing} set (more fine splits are often desirable
+These questions are further split --- at the very least, to a \textit{training}
+set and a \textit{testing} set (even finee splits are often desirable
 with enough questions available).
 To train even simple machine learning models, we should try hard to get
 at least 300 questions, but to train some more advanced models, we need
@@ -122,7 +125,7 @@ to build it.  Aside of using common employment platforms, Amazon runs a
 so-called Mechanical Turk service that allow humans to be employed easily
 for these kinds of task.  Finally, it might be possible to build the dataset
 semi-automatically by using some clever approaches --- this makes it easy
-to build a large dataset, but holds the danger of noise (non-sensical questions
+to build a large dataset, but presents the danger of noise (non-sensical questions
 or wrong reference answers) and drifting off from realistic questions the
 users will pose.  It would be an interesting problem / milestone on its own,
 but something we might have to tackle.
@@ -187,7 +190,7 @@ associated with a list of $n$ real numbers (i.e.\ coordinates of
 an $n$-dimensional vector) and these numbers are derived automatically
 just from the context the words appear in.%
 \footnote{The \textit{word2vec} method uses an idea called \textit{multi-task learning}
-	which we will mention again later --- that we are trying to learn
+	which may be useful for us as well --- that we are trying to learn
 	some easy-to-specify task and then we re-use the same model to
 	solve some much harder problems.  Here, the $n$ real numbers
 	come out from training a classifier that predicts the most likely
@@ -207,23 +210,23 @@ determined purely based on the context of the words (in Wikipedia or
 millions of news articles), the system did not have any extra information
 or databases available.
 
-\begin{figure}
+\begin{figure}[ht]
 	\centering
 	\includegraphics[width=10cm]{kingqueen.png}
 	\caption{Semantic relationships between words as arrows in the vector space.}
 	\label{fig:w2vg}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[p]
 	\centering
 	\includegraphics[width=10cm]{comparative_superlative.jpg}
 	\caption{Semantic relationships between superlative adjectives as represented in the vector space.}
 	\label{fig:w2ver}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[p]
 	\centering
-	\includegraphics[width=10cm]{capitals.png}
+	\includegraphics[width=11cm]{capitals.png}
 	\caption{Mappings between countries and capitals, acquired entirely from the typical context of the respective words.}
 	\label{fig:w2vc}
 \end{figure}
@@ -242,11 +245,11 @@ common words with entities like numbers of proper names.
 
 \subsection{NLP for Yes/No Questions}
 
-The standard NLP task which is closest to answering yes/no questions
+The standard NLP problem which is closest to answering yes/no questions
 is so-called \textit{Recognizing Text Entailment} (RTE) task.
 In the standard formulation,
 we have a paragraph of context and a phrase that either is or isn't
-\textit{entailed}, i.e. can be decided to be true based on the context.
+\textit{entailed}, i.e.\ can be decided to be true just based on the context.
 The most prominent effort in this area is probably the
 \textsc{Excitement EOP} academic project,%
 \footnote{\url{http://hltfbk.github.io/Excitement-Open-Platform/}}
@@ -265,7 +268,7 @@ its negation is entailed from a given text article.  This involves
 a mechanism to focus on the relevant parts of the article (if any)
 and some sort of semantic analysis of these parts to determine
 equivalence.
-However, we want to argue that our task significantly differs from
+However, we argue that our task significantly differs from
 the industry-standard benchmarks.  A few examples are listed in Fig.~\ref{fig:rte3}
 (more examples include answering ``text comprehension'' problems from
 English SAT exams%
@@ -276,7 +279,7 @@ require non-trivial inference from information-rich sentences.
 Of course, this is a task a perfect, Syphon-less Argus type system
 would eventually need to solve too, but our focus right now is on a much
 easier task, where often many news headings will literally already contain
-the answer we need.  Contrary to RTE, where the contextual paragraph is
+the answer we need.  In contrast to RTE, where the contextual paragraph is
 typically a short snippet, our main focus is sieving the news source for
 the relevant passages.
 
@@ -344,6 +347,9 @@ full RTE task.  Let us cover a few popular benchmarks:
 		is, say, about a number or an entity.  State-of-art approaches
 		(93.2\% accuracy)
 		include neural networks based on vector embeddings \citep{QtcDCNN}.
+		We are experimenting with some approaches in the YodaQA
+		context too.%
+\footnote{\url{https://github.com/brmson/question-classification/}}
 
 	\item \textbf{Answer Sentence Selection:} A significant portion
 		of our problem will be identifying news articles
@@ -374,7 +380,7 @@ would make it easily applicable to Argus has been left almost untackled
 in the literature.  However, several recent benchmarks in related areas
 highlight some techniques which should be highly successful on our task.
 The state-of-art algorithms often involve vector embeddings of words,
-the caveat of which is the requirement of extensively labelled data set.
+the caveat of which is the requirement of an extensively labelled data set.
 
 \section{Structure of Our Problem}
 \label{structure}
@@ -397,13 +403,13 @@ Was a miracle cure for diabetes discovered?
 Did a real blizzard lead to power cuts for more than 10 million Americans?
 Did Sears declare bankruptcy?
 \end{verbatim}
-	\caption{Sample questions as provided by the customer.}
+	\caption{Sample questions as provided by the client.}
 	\label{fig:sampleq}
 \end{figure}
 
 Clearly, not all yes/no questions are created equal:
 Some are easy to understand, others are hard.
-Some are easy to find an answers, others will produce just a smidgen of mentions in the knowledge base.
+For some, many news results will carry an answer, others will produce just a smidgen of mentions in the knowledge base.
 Some are quantitatively unclear and answers might be triggerred by published subjective opinions.
 Let us explore what these distinctions mean,
 since recognizing them and rejecting answering
@@ -480,12 +486,12 @@ Let us group the questions to several classes in terms of how easy to automatica
 \end{itemize}
 
 Aside of questions posed, another important aspect is what data sources
-we will use for answering them.  One natural idea which we are working
+to use for answering them.  One natural idea which we are working
 with from the beginning is scanning news feeds from a variety of reputable
 news sites and mining answers from natural text.
 However, as an alternative, we could leverage collaboratively maintained
-databases.  The most prominent of these is WikiData, which is becoming the
-base of many infoboxes at Wikipedia and has clear semantic structure.
+databases.  The most prominent of these is now WikiData, which is becoming the
+base of many infoboxes at Wikipedia and follows a well-defined ontology (semantic structure).
 We would have to establish some trustworthiness metrics (i.e.\ consider
 only high-profile concepts and require the value to be unchallenged in
 the database for long enough), but the advantage would be a fairly clear
@@ -519,10 +525,10 @@ for named entities%
 	that is essentially unique aliases).  For example
 	\textit{Hillary Clinton} and \textit{President of the United States}
 	both are titles of such articles.}
-	and verbs which describe clear relationships
-	and verifies that no words without an assigned role remain
-	in the question.  This should keep most of the sample questions
-	covered and with a clear interpretation.
+and verbs which describe clear relationships
+and verifies that no words without an assigned role remain
+in the question.  This should keep a fair share of the sample questions
+covered and with a clear interpretation.
 
 \section{A Concrete Proposal}
 \label{system}
@@ -541,10 +547,12 @@ As the very first knowledge base, we may acquire a number of articles
 from a defined past period from The Guardian (reputable UK newspaper)
 as they have an appealing API for these purposes.%
 \footnote{\url{http://open-platform.theguardian.com/}}
+For ongoing QA in production, we expect to mainly follow RSS feeds
+of the respective news websites.
 
 The key question is the initial mechanism of relevant data selection
-and entailment.  The primary alternative for debugging initial version
-of the system and establishing a basic baseline would be to select
+and entailment.  The primary approach for debugging initial version
+of the system and establishing a basic baseline should be to select
 sentences that contain all the given named entities\footnote{The entity name or its alias as determined
 by the Wikipedia redirect system.} and check co-occurrence with the
 relationship verb (allowing for synonymes)%
@@ -560,9 +568,9 @@ Several such aggregate generated features (like the counts above or
 per-passage entailment estimates in a sliding time window) can be used
 to train a logistic regression classifier that generates the probability.
 
-Of course, as many we are guilty of being over-optimistic about prospective
-capabilities of the systems we build.
-Still, based on our past experience with NLP projects, our qualified estimate
+Of course, as many we are guilty of often being rather optimistic about
+prospective capabilities of the systems we build.
+Still, based on our experience with NLP projects so far, our qualified estimate
 is that this should easily overcome 66\% precision for questions that
 pass the Syphon as proposed; our hope is to attack 75\% precision with
 this simple baseline.  It is difficult to consider all the potential
@@ -587,7 +595,7 @@ The original authors propose a simple convolutional neural network architecture,
 while we are also looking at a recurrent neural network; dataset size is an issue, though.}
 Alternatives may include the more traditional tree alignment models or even
 running the \textsc{Excitement EOP} pipeline to create additional features.
-Thanks to using an extra logistic regression classifier level, we may freely
+Thanks to using an extra classifier level, we may freely
 combine multiple complementary approaches.
 
 \section{Implementation and Infrastructure}
@@ -613,6 +621,13 @@ to the vector embeddings will require acquiring some dictionary of
 these (50D GloVe data is 170MB text file) that can be interfaced with
 nicely using the \texttt{gensym} Python package.
 
+The system will also offer a simple web interface%
+\footnote{We love the \texttt{flask} Python module for these purposes.}
+for asking questions
+and displaying answers, including a REST API that might carry over even
+to the production system, and a back-end process that can answer batches
+of questions about past events for easy algorithmic performance re-evaluation
+and error analysis.
 For production usage,
 a service daemon is expected to periodically gather data and aggregate
 features for each question gathered so far, and re-scan the newly collected
