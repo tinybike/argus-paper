@@ -41,20 +41,6 @@
 
 \vspace{3ex}
 
-{\itshape
-
-In the working paper you should be sure to highlight the key aspects of uncertainty and anticipated difficulty.
-	
-And also, of course, the need for +alpha development - to whatever extent you
-can detail what specifically is known and unknown that future development would
-help clarify. Bringing in +that recent Cornell research might also be helpful
-if you consider it valid (I know you were kind of skeptical of it).
-
-Another thing I neglected to mention - I know they're not exactly the same, but it would also be very good to whatever extent you can to
-point to YodaQA as a kind of preliminary proof of concept and include any mention you can of the lessons learned from building that and how those
-lessons would/might come in to play with building the "yes/no/unclear" Argus option.
-}
-
 Our team at the Ailao startup, based at the 3C Group FEE CTU,
 is composed of people working at the boundary of academic and commercial
 sector and with a history of projects that involve
@@ -221,6 +207,27 @@ determined purely based on the context of the words (in Wikipedia or
 millions of news articles), the system did not have any extra information
 or databases available.
 
+\begin{figure}
+	\centering
+	\includegraphics[width=10cm]{kingqueen.png}
+	\caption{Semantic relationships between words as arrows in the vector space.}
+	\label{fig:w2vg}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=10cm]{comparative_superlative.jpg}
+	\caption{Semantic relationships between superlative adjectives as represented in the vector space.}
+	\label{fig:w2ver}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=10cm]{capitals.png}
+	\caption{Mappings between countries and capitals, acquired entirely from the typical context of the respective words.}
+	\label{fig:w2vc}
+\end{figure}
+
 A lot of the current research focuses on the best ways to build up
 vector representations of whole sentences and documents --- ranging
 from simple averaging \cite{CNNSentClass,DefGen} (successful baselines)
@@ -274,6 +281,7 @@ typically a short snippet, our main focus is sieving the news source for
 the relevant passages.
 
 \begin{figure}
+	\footnotesize
 	\textbf{Context:} The sale was made to pay Yukos' US\$ 27.5 billion tax bill, Yuganskneftegaz was originally sold for US\$ 9.4 billion to a little known company Baikalfinansgroup which was later bought by the Russian state-owned oil company Rosneft. \\
 	\textbf{Hypothesis:} Baikalfinansgroup was sold to Rosneft.
 
@@ -424,7 +432,7 @@ Let us group the questions to several classes in terms of how easy to automatica
 		instead of ``abandon the euro'' and ``declare bankrupcy''
 		is the same as e.g.\ ``go bankrupt''.
 
-		Based on results like TODO,
+		Based on results like \cite{DefGen,QANTA},
 		we can predict that many of the simpler paraphrases
 		would be covered by vector embeddings%
 \footnote{There is also a Wordnet dictionary that covers many synonymic relationships of individual words, but extending it to verb/noun combinations is less trivial.}
@@ -519,24 +527,112 @@ for named entities%
 \section{A Concrete Proposal}
 \label{system}
 
-Concrete system proposal: Syphon that detects named entities (enwiki titles) and verbs, rejects if anything extra is present.
-Get pre-processed version from syphon.
-Scan news titles (and possibly structured databases), model entailment (yes, unknown, now) for each,
-use relative counts (normalized by general named entity occurrence) to estimate probability.
+Based on the analysis above, let us summarize and outline a particular
+proposal for a baseline system:
 
-initial knowledge base: guardian api? wikidata?
+\begin{itemize}
+	\item Syphon module that detects named entities (enwiki titles) and verbs, rejects if anything extra is present.
+	\item Pre-processed question is transferred from Syphon to Argus back-end.
+	\item News titles (and possibly article texts, structured databases) are scanned for relevant data, entailment (yes, no, unknown) is modelled for each.
+	\item Relative entailment counts (normalized by general frequency of the named entity in the souces) are used to estimate probability.
+\end{itemize}
 
-baseline entailment method: bag-of-words, use Wordnet synsets.
-Deep anssentsel would be easy, but needs a dataset of at least a few thousand question, sentence pairs - use multitask learning?
+As the very first knowledge base, we may acquire a number of articles
+from a defined past period from The Guardian (reputable UK newspaper)
+as they have an appealing API for these purposes.%
+\footnote{\url{http://open-platform.theguardian.com/}}
+
+The key question is the initial mechanism of relevant data selection
+and entailment.  The primary alternative for debugging initial version
+of the system and establishing a basic baseline would be to select
+sentences that contain all the given named entities\footnote{The entity name or its alias as determined
+by the Wikipedia redirect system.} and check co-occurrence with the
+relationship verb (allowing for synonymes)%
+\footnote{There is a popular NLP database called Wordnet which is
+an excellent machine-readable thesaurus.} and count other words.
+We may try relaxing the Syphon to allow more free-form input and
+use the skip-bigram approach of \cite{WatsonEvidence}.
+A simple algorithm of straight textual alignment of the question and news titles \cite{WatsonEvidence}
+(using Wordnet for fuzzy matching aain) might be rather rigid,
+but produce a very strong signal when triggered.
+
+Several such aggregate generated features (like the counts above or
+per-passage entailment estimates in a sliding time window) can be used
+to train a logistic regression classifier that generates the probability.
+
+Of course, as many we are guilty of being over-optimistic about prospective
+capabilities of the systems we build.
+Still, based on our past experience with NLP projects, our qualified estimate
+is that this should easily overcome 66\% precision for questions that
+pass the Syphon as proposed; our hope is to attack 75\% precision with
+this simple baseline.  It is difficult to consider all the potential
+challenges in advance, but we are optimistic mainly since our questions
+will be so restricted by the Syphon.  Potential challenges certainly include
+ambiguous verbs being passed by Syphon, keeping the system behavior consistent
+for very frequently mentioned and rarely mentioned entities both, and handling
+rapid temporal transitions.%
+\footnote{Hypothetical scenario: Germany abandons the euro for mark,
+then mark for the dollar.  Will our time windows cope with the abandonment
+of euro being overshadowed by abandonment of mark?}
+
+Improving this further, our first idea would be to obtain a richer annotated
+dataset (either from humans or combining that with some auto-generation
+approaches) and train the deep answer sentence selection model \cite{Yu2014Deep}
+that could use vector embeddings to decide entailment; this could both
+raise precision and allow more complex expressions to pass Syphon.%
+\footnote{Performance of this model could be further boosted by using
+a more sophisticated model for building composite embeddings for whole sentences than simple averaging.
+This is a problem we are investigating within YodaQA right now.
+The original authors propose a simple convolutional neural network architecture,
+while we are also looking at a recurrent neural network; dataset size is an issue, though.}
+Alternatives may include the more traditional tree alignment models or even
+running the \textsc{Excitement EOP} pipeline to create additional features.
+Thanks to using an extra logistic regression classifier level, we may freely
+combine multiple complementary approaches.
 
 \section{Implementation and Infrastructure}
 \label{infra}
 
-technical details --- python, database used, etc.
+Let us share some of our current thoughts about how to implement the Argus system in practice.
+We propose to build the initial prototype in \textbf{Python} because of its ease of
+prototyping and very rich set of machine learning libraries.
+For some basic NLP, we will leverage the \texttt{nltk} package,
+while \texttt{scikit-learn} would be used
+for the machine learning model.
 
-news gathering etc.
+Our system will likely not need to search in past news articles
+but mainly scan them sequentially, so storing them in a fulltext-indexed
+store like \textbf{Solr} or \textbf{Elastic Search} probably won't be
+beneficial; we will initially store them as plain files or in an SQL
+database (like \textbf{SQLite} or PostgreSQL) with trivial schema for the time being,
+mainly for the purposes of training on some past-questions datasets.
+Our initial baseline will also need access to the list of Wikipedia
+titles and redirects, which is provided by the \textbf{DBpedia} project (that
+has a public SPARQL endpoint and we also run our own), while moving
+to the vector embeddings will require acquiring some dictionary of
+these (50D GloVe data is 170MB text file) that can be interfaced with
+nicely using the \texttt{gensym} Python package.
 
-distributed system prospects.
+For production usage,
+a service daemon is expected to periodically gather data and aggregate
+features for each question gathered so far, and re-scan the newly collected
+news for all questions.
+
+We are strong believers in designing the initial system for maximum
+ease of prototyping and having the maximum flexibility in technical
+choices.  Therefore, the choice of Python etc.\ is not a statement
+that the final system will be in Python as well, but the hard part
+in Argus development is getting the mix of featues right and picking
+the right algorithms; reimplementing them in Java or another language
+that also has rich NLP and ML ecosystem later would be the much easier
+part.
+
+For a distributed system, we believe both Python and Java are great
+choices as they are cross-platform not just in theory.  There might
+be no need for large project-specific databases and the generic models
+should not take more than (low) hundreds of megabytes of data.  This
+paints a bright future for decentralized Argus that runs on many
+distributed nodes independently.
 
 \bibliographystyle{plainnat}
 \bibliography{qa}
