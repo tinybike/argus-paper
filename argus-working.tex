@@ -114,7 +114,7 @@ We should start with at least 100 questions for initial evaluation of our
 baseline.
 
 These questions are further split --- at the very least, to a \textit{training}
-set and a \textit{testing} set (even finee splits are often desirable
+set and a \textit{testing} set (even finer splits are often desirable
 with enough questions available).
 To train even simple machine learning models, we should try hard to get
 at least 300 questions, but to train some more advanced models, we need
@@ -123,7 +123,7 @@ to aim at figures like 6000 questions.
 To get the dataset, the simplest option is to hire low-paid virtual assistants
 to build it.  Aside of using common employment platforms, Amazon runs a
 so-called Mechanical Turk service that allow humans to be employed easily
-for these kinds of task.  Finally, it might be possible to build the dataset
+for these kinds of tasks.  Finally, it might be possible to build the dataset
 semi-automatically by using some clever approaches --- this makes it easy
 to build a large dataset, but presents the danger of noise (non-sensical questions
 or wrong reference answers) and drifting off from realistic questions the
@@ -190,7 +190,7 @@ associated with a list of $n$ real numbers (i.e.\ coordinates of
 an $n$-dimensional vector) and these numbers are derived automatically
 just from the context the words appear in.%
 \footnote{The \textit{word2vec} method uses an idea called \textit{multi-task learning}
-	which may be useful for us as well --- that we are trying to learn
+	which may be useful for us as well --- we try to learn
 	some easy-to-specify task and then we re-use the same model to
 	solve some much harder problems.  Here, the $n$ real numbers
 	come out from training a classifier that predicts the most likely
@@ -220,7 +220,9 @@ or databases available.
 \begin{figure}[p]
 	\centering
 	\includegraphics[width=10cm]{comparative_superlative.jpg}
-	\caption{Semantic relationships between superlative adjectives as represented in the vector space.}
+	\caption{Semantic relationships between superlative adjectives as represented in the vector space.
+		This is a 2D projection of the high-dimensional space that is designed to well preserve relative positions of the shown entities
+		(so-called t-SNE 2D).}
 	\label{fig:w2ver}
 \end{figure}
 
@@ -352,7 +354,7 @@ full RTE task.  Let us cover a few popular benchmarks:
 \footnote{\url{https://github.com/brmson/question-classification/}}
 
 	\item \textbf{Answer Sentence Selection:} A significant portion
-		of our problem will be identifying news articles
+		of our problem will be isolating news articles
 		and sentences relevant to our questions in large swathes
 		of irrelevant data.  The sentence selection sub-task is
 		about identifying sentences that bear an answer to the
@@ -380,7 +382,9 @@ would make it easily applicable to Argus has been left almost untackled
 in the literature.  However, several recent benchmarks in related areas
 highlight some techniques which should be highly successful on our task.
 The state-of-art algorithms often involve vector embeddings of words,
-the caveat of which is the requirement of an extensively labelled data set.
+the caveat of which is the requirement of an extensively annotated
+data set, e.g.\ using Mechanical Turk or a hybrid partially automated
+approach.
 
 \section{Structure of Our Problem}
 \label{structure}
@@ -408,8 +412,8 @@ Did Sears declare bankruptcy?
 \end{figure}
 
 Clearly, not all yes/no questions are created equal:
-Some are easy to understand, others are hard.
-For some, many news results will carry an answer, others will produce just a smidgen of mentions in the knowledge base.
+Some are easy to understand; others are hard.
+For some, many news results will carry an answer; others will produce just a smidgen of mentions in the knowledge base.
 Some are quantitatively unclear and answers might be triggerred by published subjective opinions.
 Let us explore what these distinctions mean,
 since recognizing them and rejecting answering
@@ -444,14 +448,15 @@ Let us group the questions to several classes in terms of how easy to automatica
 \footnote{There is also a Wordnet dictionary that covers many synonymic relationships of individual words, but extending it to verb/noun combinations is less trivial.}
 		but this is unlikely to solve the ``abandon the euro''.
 		We can either rely on stricter Syphon
-		(we could suggest templates like ``starts'' and ``stops''
-		together with knowledge base attributes),
-		or simply hope that the newspapers will use so varied
-		phrasings that the one particularly in the question
+		(we could suggest manually created templates like
+		``becomes $X$'' and ``stops being $X$''
+		with regard to a knowledge base attribute),
+		or simply hope that the news sources scanned will use so
+		much variation in phrasing of what happened that the phrase particularly in the question
 		will still appear often enough; the alpha prototype
 		should shed more light on this.
 
-		Also, another tricky part is that \textbf{Sears} is name
+		Also, another tricky part is that \textbf{Sears} is the name
 		of many legal entities; do we mean the department store
 		chain, \textbf{Sears Holdings} or some sister company?
 		However, Syphon can catch ambiguous references like this.
@@ -465,6 +470,11 @@ Let us group the questions to several classes in terms of how easy to automatica
 		be able to decompose this question to simple elements
 		and relationships between these and so shouldn't let
 		pass these questions through.
+
+		Of course, in the whole-system perspective this means
+		that the Syphon will instead
+		prompt the user, ask for more detail and
+		eventually let a sufficiently precise question on this topic through.
 
 	\item Subjective questions: \textbf{Was Obamacare dismantled by the Supreme Court?},
 		\textbf{Did Israel attack Iran?},
@@ -498,7 +508,7 @@ the database for long enough), but the advantage would be a fairly clear
 signal for our system, e.g.\ in the form of clearly valued \textit{currency}
 property for the \textit{Germany} entity.
 
-\section{How Can We Know What Do We Know?}
+\section{How Can We Know What We Know?}
 \label{syphon}
 
 The initial phase of the Argus system needs to be the Syphon sub-system
@@ -537,10 +547,11 @@ Based on the analysis above, let us summarize and outline a particular
 proposal for a baseline system:
 
 \begin{itemize}
-	\item Syphon module that detects named entities (enwiki titles) and verbs, rejects if anything extra is present.
+	\item Syphon module that detects and requires named entities (enwiki titles, dates, \dots) and verbs, rejects if anything extra is present.
 	\item Pre-processed question is transferred from Syphon to Argus back-end.
 	\item News titles (and possibly article texts, structured databases) are scanned for relevant data, entailment (yes, no, unknown) is modelled for each.
 	\item Relative entailment counts (normalized by general frequency of the named entity in the souces) are used to estimate probability.
+	\item The output is accompanied with a justification --- summary of evidence for or against the system decision.
 \end{itemize}
 
 As the very first knowledge base, we may acquire a number of articles
@@ -551,9 +562,9 @@ For ongoing QA in production, we expect to mainly follow RSS feeds
 of the respective news websites.
 
 The key question is the initial mechanism of relevant data selection
-and entailment.  The primary approach for debugging initial version
+and entailment.  The primary approach for debugging the initial version
 of the system and establishing a basic baseline should be to select
-sentences that contain all the given named entities\footnote{The entity name or its alias as determined
+sentences that contain all the relevant named entities\footnote{The entity name or its alias as determined
 by the Wikipedia redirect system.} and check co-occurrence with the
 relationship verb (allowing for synonymes)%
 \footnote{There is a popular NLP database called Wordnet which is
@@ -597,6 +608,13 @@ Alternatives may include the more traditional tree alignment models or even
 running the \textsc{Excitement EOP} pipeline to create additional features.
 Thanks to using an extra classifier level, we may freely
 combine multiple complementary approaches.
+
+On the other hand, before Argus goes fully live as an independent referee option, it could be part of a hybrid in
+which human referees report on the outcome with the aid of Argus.  Argus scans news sources,
+provides its determinations on which predictions are true / false / uncertain with links to
+supporting sources (perhaps with annotated excerpts) that make it clear how Argus came to its
+determinations. Argus would then cumulatively learn via machine learning based on which of its
+decisions were accepted and which were rejected by the human referees.
 
 \section{Implementation and Infrastructure}
 \label{infra}
