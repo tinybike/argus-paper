@@ -6,6 +6,7 @@
 \usepackage{url}
 \usepackage{hyperref}
 \usepackage[round]{natbib}
+\usepackage[font=small]{caption}
 
 % natbib link joining; somewhat breaks \citep, \citept
 \makeatletter
@@ -222,7 +223,7 @@ or databases available.
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=10cm]{kingqueen.png}
-	\caption{Semantic relationships between words as arrows in the vector space.}
+	\caption{Semantic relationships between words as arrows in the vector space. \cite{WordVecLingReg}}
 	\label{fig:w2vg}
 \end{figure}
 
@@ -231,14 +232,17 @@ or databases available.
 	\includegraphics[width=10cm]{comparative_superlative.jpg}
 	\caption{Semantic relationships between superlative adjectives as represented in the vector space.
 		This is a 2D projection of the high-dimensional space that is designed to well preserve relative positions of the shown entities
-		(so-called t-SNE 2D).}
+		(so-called t-SNE 2D).
+		\cite{Glove}}
 	\label{fig:w2ver}
 \end{figure}
 
 \begin{figure}[p]
 	\centering
 	\includegraphics[width=11cm]{capitals.png}
-	\caption{Mappings between countries and capitals, acquired entirely from the typical context of the respective words.}
+	\caption{Mappings between countries and capitals, acquired entirely from the typical context of the respective words.
+	This is again a 2D projection of the high-dimensional space, this time obtained by a PCA dimensionality reduction technique.
+	\cite{DistReprComp}}
 	\label{fig:w2vc}
 \end{figure}
 
