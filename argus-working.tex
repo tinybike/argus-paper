@@ -33,9 +33,9 @@
 	We give a brief overview of the relevant state-of-art methods
 	in the academic field of Natural Language Processing,
 	requirements for building a solid state-of-art system
-	and difficulties we may anticipate in the road ahead.
+	and difficulties we may anticipate on the road ahead.
 	Based on this, we propose a basic architecture of the Argus
-	system, roadmap to achieve baseline performance, and a basic
+	system, a roadmap to achieve baseline performance, and a basic
 	version of the Syphon system.
 \end{abstract}
 
@@ -86,7 +86,7 @@ to build a system from scratch, reusing mainly our expertise and possibly
 some isolated external components (e.g.\ database interfaces or NLP annotators).
 
 The rest of the paper is structured as follows.
-In Sec.~\ref{qaml}, we rehash what does it involve to build Natural Language Processing
+In Sec.~\ref{qaml}, we rehash what does it involve to build a Natural Language Processing
 system that uses machine learning and is rigorously developed and measured.
 In Sec.~\ref{ynml}, we look at the current scientific concepts that relate
 to the yes/no QA task at hand, and at their performance.
@@ -97,7 +97,7 @@ even before attempting an answer in Sec.~\ref{syphon}.
 We sketch the system and its main concrete strategies based on these
 ingredients in Sec.~\ref{system}.
 Lastly in the Sec.~\ref{infra}, we give an overview of
-the boring but most essential part of the system --- the infrastructure
+the most essential part of the system --- the infrastructure
 that collects and manages our data, runs the experiments and interacts with the user.
 
 \section{QA System in the Machine Learning Context}
@@ -117,10 +117,11 @@ base that should, on its own, lend support to deciding these questions.%
 of course.}
 
 In general, the bigger the dataset, the better.  Commonly used datasets
-range in size from low hundreds%
+range in size from the low hundreds%
 \footnote{E.g.\ the \textit{Curated TREC QA Track Dataset} \url{https://github.com/brmson/dataset-curated-factoid/}}
-to tens of thousands%
+to the tens of thousands%
 \footnote{E.g.\ the \textit{Large Movie Review Dataset} \url{http://ai.stanford.edu/~amaas/data/sentiment/}}
+(of questions, statements, queries)
 but we can certainly grow the dataset as needed and we will be able to identify
 insufficient dataset size as a possible improvement factor during development.
 We should start with at least 100 questions for initial evaluation of our
@@ -150,11 +151,6 @@ generating a medium-quality dataset like this should be straightforward,
 and reviewing predefined annotations by humans is much easier and faster
 than creating the annotations in the first place.
 
-\textit{Our project proposal assumed that you would deliver such a dataset.
-	We can certainly also arrange building such a dataset, in the vein
-	of future-looking questions you have provided us, as an additionally
-budgeted milestone.}
-
 The main criterium for evaluating our system is obviously \textit{accuracy},
 that is the percentage of questions our system gets right.  However, this
 number does not capture questions where the system ``gives up'' and says
@@ -163,10 +159,10 @@ of questions the system gets right when it decides to answer, and (ii) the
 percentage of questions the system decides to answer.%
 \footnote{This combined percentage is called \textit{F1 score} in machine learning jargon.}
 We can always change the threshold of confidence the system uses to decide
-whether to answer to keep the accuracy of answered questions at the desired
-score like 95\%, the caveat is that the system may refuse to answer almost
+whether to answer to keep the accuracy of answered questions at the minimum
+target score of 95\%, the caveat is that the system may refuse to answer almost
 all questions at that point; therefore, this average metric is a better
-option for judging the system performance.
+option for judging the system's performance.
 
 Performance evaluation in the machine learning context has two clear limitations
 that we are not sure how to overcome right now.  First, it is not clear how to
@@ -189,7 +185,7 @@ proprietary analyst), or even bounties for bad questions.
 When considering the relevant state-of-art in Machine Learning (ML) and
 Natural Language Processing (NLP), we will first give a short overview
 of the recent advances in general natural language processing techniques,
-then consider state-of-art in all the specific areas pertaining our question
+then consider the state-of-art in all the specific areas pertaining to our question
 answering task.
 
 \subsection{Vector Embeddings}
@@ -197,7 +193,7 @@ answering task.
 Recent progress in NLP has been marked mainly by the proliferation of
 so-called \textit{vector embeddings}, the most popular being called
 \textit{word2vec}.  This approach stems from the so-called \textit{distributional semantics}
-hypothesis, which poses that we can derive meanings of words purely
+hypothesis, which posits that we can derive meanings of words purely
 from the context they tend to appear in.  Therefore, each word is
 associated with a list of $n$ real numbers (i.e.\ coordinates of
 an $n$-dimensional vector) and these numbers are derived automatically
@@ -216,11 +212,11 @@ For example, if we do arithmetics on these word vectors and try
 to compute e.g.\ $king + (woman - man)$, the nearest vector we reach
 is $queen$, i.e.\ the gender transition is represented by an arrow
 in our vector space (Fig.~\ref{fig:w2vg}).
-Fig.~\ref{fig:w2ver} shows how are relationships between adjectives represented
+Fig.~\ref{fig:w2ver} shows how relationships between adjectives are represented
 while Fig.~\ref{fig:w2vc} shows mappings between coordinates of countries
 and their capitals.  Let us emphasize again that these coordinates were
 determined purely based on the context of the words (in Wikipedia or
-millions of news articles), the system did not have any extra information
+millions of news articles); the system did not have any extra information
 or databases available.
 
 \begin{figure}[ht]
@@ -256,12 +252,12 @@ are popping up; this method became state-of-art for machine translation
 types of question answering \citep{QANTA,DefGen,ReadAndComprehend}%
 \footnote{The demo at \url{http://45.55.181.170/defgen/} is nice.}.
 One open problem is efficient composition of vector embeddings for
-common words with entities like numbers of proper names.
+common words with entities like numbers or proper names.
 
 \subsection{NLP for Yes/No Questions}
 
 The standard NLP problem which is closest to answering yes/no questions
-is so-called \textit{Recognizing Text Entailment} (RTE) task.
+is the so-called \textit{Recognizing Text Entailment} (RTE) task.
 In the standard formulation,
 we have a paragraph of context and a phrase that either is or isn't
 \textit{entailed}, i.e.\ can be decided to be true just based on the context.
