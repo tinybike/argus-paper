@@ -295,7 +295,7 @@ Of course, this is a task a perfect, Syphon-less Argus type system
 would eventually need to solve too, but our focus right now is on a much
 easier task, where often many news headings will literally already contain
 the answer we need.  In contrast to RTE, where the contextual paragraph is
-typically a short snippet, our main focus is sieving the news source for
+typically a short snippet, our main focus is filtering the news source for
 the relevant passages.
 
 \begin{figure}
@@ -412,8 +412,8 @@ Was Saudi Arabia’s monarchy dethroned in a coup d’etat?
 Did Iran test detonate a nuclear bomb?
 Did Israel attack Iran?
 Did Germany ban the PEDIGA movement?
-Did the US dollar collapse by at least 50\%?
-Did the euro collapse another 50\%?
+Did the US dollar collapse by at least 50%?
+Did the euro collapse another 50%?
 Did Germany abandon the euro?
 Did the EU slide into a new recession?
 Was a miracle cure for diabetes discovered?
@@ -430,10 +430,10 @@ For some, many news results will carry an answer; others will produce just a smi
 Some are quantitatively unclear and answers might be triggerred by published subjective opinions.
 Let us explore what these distinctions mean,
 since recognizing them and rejecting answering
-the hard questions outright is our key to achieving a high precision.
+the hard questions outright is our key to achieving a high level of precision.
 Fig.~\ref{fig:sampleq} contains a list of sample questions (forward-looking as of now).
 
-Let us group the questions to several classes in terms of how easy to automatically judge they are:
+Let us group the questions into several classes in terms of how easy to automatically judge they are:
 
 \begin{itemize}
 	\item Clear-cut questions: \textbf{Did X Y become President?},
@@ -465,7 +465,8 @@ Let us group the questions to several classes in terms of how easy to automatica
 		``becomes $X$'' and ``stops being $X$''
 		with regard to a knowledge base attribute),
 		or simply hope that the news sources scanned will use so
-		much variation in phrasing of what happened that the phrase particularly in the question
+		much variation in the phrasing of what happened that the particular phrasing used in the question
+		(or something fairly close to it involving close synonyms)
 		will still appear often enough; the alpha prototype
 		should shed more light on this.
 
@@ -482,7 +483,7 @@ Let us group the questions to several classes in terms of how easy to automatica
 		is unlikely to produce any results.  Syphon shouldn't
 		be able to decompose this question to simple elements
 		and relationships between these and so shouldn't let
-		pass these questions through.
+		these questions pass through.
 
 		Of course, in the whole-system perspective this means
 		that the Syphon will instead
@@ -498,7 +499,7 @@ Let us group the questions to several classes in terms of how easy to automatica
 		them with Syphon may be problematic.  Entity X attacking
 		entity Y seems quite unambiguous and well-defined.
 		On the other hand, the definition of ``attack'' may
-		vary widely\footnote{Israel is a good example as the country is known for executing military and intelligence operations covertly and avoiding admission of involvement.} --- from bombing of specific site
+		vary widely\footnote{Israel is a good example as the country is known for executing military and intelligence operations covertly and avoiding admission of involvement.} --- from the bombing of a specific site
 		to a full-scale military attack.
 
 		We don't have a good solution to this class of questions,
@@ -534,7 +535,7 @@ aspect for trustworthiness of the system is that the representation is
 shown (in user-friendly form) to Argus users as a feedback and a clear
 signal of how the system will decide the answers.
 
-To maintain high precision of answers, the Syphon system should be
+To maintain a high precision level of answers, the Syphon system should be
 conservative about the questions it allows.  For the baseline system,
 in light of the analysis of question classes above,
 we want to propose a simple Syphon which scans the question
@@ -557,7 +558,7 @@ Fig.~\ref{fig:syphon} shows a simple visual concept of the initial Syphon.
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=14cm]{syphon_ss.jpg}
-	\caption{A visual sketch of Syphon auto-completion interface.}
+	\caption{A visual sketch of Syphon auto-completion aspect.}
 	\label{fig:syphon}
 \end{figure}
 
@@ -600,8 +601,8 @@ Several such aggregate generated features (like the counts above or
 per-passage entailment estimates in a sliding time window) can be used
 to train a logistic regression classifier that generates the probability.
 
-Of course, as many we are guilty of often being rather optimistic about
-prospective capabilities of the systems we build.
+Of course, as many developers can be, we are guilty of often being rather optimistic about
+the prospective capabilities of the systems we build.
 Still, based on our experience with NLP projects so far, our qualified estimate
 is that this should easily overcome 66\% precision for questions that
 pass the Syphon as proposed; our hope is to attack 75\% precision with
@@ -609,7 +610,7 @@ this simple baseline.  It is difficult to consider all the potential
 challenges in advance, but we are optimistic mainly since our questions
 will be so restricted by the Syphon.  Potential challenges certainly include
 ambiguous verbs being passed by Syphon, keeping the system behavior consistent
-for very frequently mentioned and rarely mentioned entities both, and handling
+for both very frequently mentioned and rarely mentioned entities, and handling
 rapid temporal transitions.%
 \footnote{Hypothetical scenario: Germany abandons the euro for mark,
 then mark for the dollar.  Will our time windows cope with the abandonment
@@ -678,7 +679,7 @@ choices.  Therefore, the choice of Python etc.\ is not a statement
 that the final system will be in Python as well, but the hard part
 in Argus development is getting the mix of featues right and picking
 the right algorithms; reimplementing them in Java or another language
-that also has rich NLP and ML ecosystem later would be the much easier
+that also has a rich NLP and ML ecosystem later would be the much easier
 part.
 
 For a distributed system, we believe both Python and Java are great
