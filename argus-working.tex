@@ -7,6 +7,7 @@
 \usepackage{hyperref}
 \usepackage[round]{natbib}
 \usepackage[font=small]{caption}
+\usepackage{amsmath}
 
 % natbib link joining; somewhat breaks \citep, \citept
 \makeatletter
@@ -688,6 +689,97 @@ be no need for large project-specific databases and the generic models
 should not take more than (low) hundreds of megabytes of data.  This
 paints a bright future for decentralized Argus that runs on many
 distributed nodes independently.
+
+
+\section{The real system}
+\label{infra}
+
+\subsection{Syphon}
+We picked \textit{spacy} as the dependency parser of choice. Spacy is one of the fastest dependency parsers available  (14000 tokens/s), while maintaining good accuracy. \footnote{http://aclweb.org/anthology/P/P15/P15-1038.pdf}
+
+...smh more about spacy?...
+
+We use spacy to look for keywords in the posed question. 
+
+...keywords, searchwords...
+
+...filtering...
+
+\subsection{Classification vs Relevance}
+
+After brief error analysis it became obvious that the main problem for any used classifier will be the extreme noise presented in the data. Approximately 80\% of all found sentences were irrelevant to the posed question. While on topic (all searchwords have to be present in the sentence), 
+the sentences did not directly address the question or the answers were outdated.
+
+--examples--
+
+One obvious approach would be to implement a second classifier that would decide if the presented sentence is relevant to the posed question. 
+
+Of course this classifier would not be perfect. While it would probably reduce the noise by some margin, it would by no means nullify it. Nevertheless we tried, using mTurk, to create a relevance dataset consisting of triplets question-sentence-label. This has turned out to be quite difficult, mainly because the dataset would have to be at least an order of magnitude larger than the question dataset (each question has at least 10 sentences on average).
+Also the presented task proved to be confusing for many mTurk users who answered the questions directly.
+
+\subsection{ClasRel model}
+After realizing the 2 classifiers option was not viable, we began to look for a model that would, ideally, deal with both classification and relevance at the same time.
+
+Lets suppose we have the full information on both classification and relevance. This means that the unrelevant sentences has relevance '0' and we dont care about its classification. On the other hand, relevant sentences have relevance '1' and we do care about its classification. If we have an access to the full information, the straightforward approach would be to average the classification of all relevant sentences (while some sentences may contradict each other, we care about the majority answer). This, however, introduces unsmoothness to the value function. So how can we rewrite the function while preserving the smoothness for an easy gradient descent?
+
+We propose the following model:\\
+
+\[ y  = \dfrac{\sum_i C_iR_i}{\sum_i R_i}
+\]
+By weighting the classification by its relevance, the model works just as we hoped it would. And, what is more important, one can imagine that the model would work even if some uncertainty would be introduced. Of course we do not have access to the true classification/relevance, but this is where we introduce classic machine learning techniques for estimating the true values. The main advantage of the model is our ability to learn end-to-end without explicitly specifying the relavance and classification of each sentence. 
+
+---
+
+The basic model then consists of classification feature vectors $c_i$, relevance feature vectors $r_i$ and model parameter vectors $w, q$:
+\[ y  = \dfrac{\sum_i \sigma(wc_i)\sigma(qr_i)}{\sum_i \sigma(qr_i)}
+\]
+We use sigmoid activation functions for both classification and relevance outputs, although other options are available. There are two limitations on the used functions:
+$$a(wc_i) \in  \left\langle 0,1\right\rangle , \quad a(qr_i) > 0$$
+
+\subsection{Used Features}
+\subsubsection{Classification}
+\begin{itemize}
+\item \textbf{Sentiment:} One of the first few features introduced when building the system. The idea is, that if both the question and the sentence are both positive (negative), they should be consistent with each other. The sentiment feature extract some sentiment score (sum of weighted emotionaly-colored words) for the question and each sentence.
+
+\item\textbf{Object, Subject match:} Two straightforward features, return '1' if question-sentence subjects (or subject-object) match, otherwise '0'.
+
+\item\textbf{Verb similarity:} Because we do not search the database for verb in the question itself, we introduce verb similarity features. These features output a number $\in \left\langle 0,1\right\rangle$ capturing linguistical similarity of those words. We use WordNet and spacy, each with its own feature.
+\end{itemize}
+
+\subsubsection{Relevance}
+\begin{itemize}
+\item \textbf{Date distance:} It is important to differentiate between relevant and outdated information. Using spacy, we extract time information from the question (if possible). Each article in our news database also contains its release date. This feature returns a number, depending on the time distance between the question and sentence.
+
+\item\textbf{Elastic score:} Internal search score of the elasticsearch database, we count more if elastic found words in the headline or snippet.
+
+\item\textbf{Object, Subject match:} Same as classification.
+
+
+\end{itemize}
+\subsection{RNN}
+Perhaps the most important feature implemented so far is a recurrent neural network (RNN). The network uses GloVe word embeddings for converting words to numerical vectors. 
+
+---how rnn works? (not necessary)---
+
+The outputs of the RNN are then sent side by side to a simple dense layer, wich oitputs a single scalar (vector) representing its value.
+
+The model was tried separately, only as a classification feature and achieved accuracy over 78\%, a little more then all the other simple features put together (75\%).
+
+\subsection{Full model}
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=15cm]{clasrelfull}
+	\caption{The full model.}
+	\label{fig:w2vg}
+\end{figure}
+\subsection{Results, comparison}
+...
+
+
+
+
+
+
 
 \bibliographystyle{plainnat}
 \bibliography{qa}
