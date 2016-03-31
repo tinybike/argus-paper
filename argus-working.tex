@@ -699,11 +699,17 @@ We picked \textit{spacy} as the dependency parser of choice. Spacy is one of the
 
 ...smh more about spacy?...
 
-We use spacy to look for keywords in the posed question. 
+We use spacy to look for keywords in the posed question. Keywords are all non-numerical entities and also important verbs. We could also just take all the non-stop-words and count them as keywords, however by doing this we would be unable to identify errors made by the dependency parser. 
 
-...keywords, searchwords...
+We use keywords for double checking our understanding of the question: if some non-stop-words are missing from keywords, we do not attempt to answer (this might change in the future).
 
-...filtering...
+If we are able to identify all the keywords, we continue to another phase, wich is finding relevant articles. For this we use so called \textit{searchwords}; these are keywords stripped of any verbs. Motivation behind stripping verbs is the fact that we can often express the same meaning using different verbs.
+
+---examples---
+
+In all the articles in our database, we then try to find sentences containing all the previously mentioned searchwords. If we are unable to find such sentences, we do not try to answer the question. While one might argue that the presence of all entities in a sentence is not required for the sentence to contain the answer, we would be exposing ourselves to a lot of noise by downplaying these conditions.
+
+After finding as much sentences as we can, the system begins its most important task - classification.
 
 \subsection{Classification vs Relevance}
 
@@ -728,7 +734,7 @@ We propose the following model:\\
 \]
 By weighting the classification by its relevance, the model works just as we hoped it would. And, what is more important, one can imagine that the model would work even if some uncertainty would be introduced. Of course we do not have access to the true classification/relevance, but this is where we introduce classic machine learning techniques for estimating the true values. The main advantage of the model is our ability to learn end-to-end without explicitly specifying the relavance and classification of each sentence. 
 
----
+---smh
 
 The basic model then consists of classification feature vectors $c_i$, relevance feature vectors $r_i$ and model parameter vectors $w, q$:
 \[ y  = \dfrac{\sum_i \sigma(wc_i)\sigma(qr_i)}{\sum_i \sigma(qr_i)}
