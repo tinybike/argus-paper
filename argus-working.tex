@@ -739,10 +739,10 @@ By weighting the classification by its relevance, the model works just as we hop
 ---smh
 
 The basic model then consists of classification feature vectors $c_i$, relevance feature vectors $r_i$ and model parameter vectors $w, q$:
-\[ y  = \dfrac{\sum_i \sigma(wc_i)\sigma(qr_i)}{\sum_i \sigma(qr_i)}
+\[ y  = \dfrac{\sum_i \sigma(w^Tc_i)\sigma(q^Tr_i)}{\sum_i \sigma(q^Tr_i)}
 \]
 We use sigmoid activation functions for both classification and relevance outputs, although other options are available. There are two limitations on the used functions:
-$$a(wc_i) \in  \left\langle 0,1\right\rangle , \quad a(qr_i) > 0$$
+$$a(w^Tc_i) \in  \left\langle 0,1\right\rangle , \quad a(q^Tr_i) > 0$$
 
 \subsection{Used Features}
 \subsubsection{Classification}
