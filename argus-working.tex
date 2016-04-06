@@ -692,10 +692,10 @@ distributed nodes independently.
 
 
 \section{The real system}
-\label{infra}
+\label{real}
 
 \subsection{Syphon}
-We picked \textit{spacy} as the dependency parser of choice. Spacy is one of the fastest dependency parsers available  (14000 tokens/s), while maintaining good accuracy. \footnote{http://aclweb.org/anthology/P/P15/P15-1038.pdf}
+We picked \textit{spacy} as the dependency parser of choice. Spacy is one of the fastest dependency parsers available  (14000 tokens/s), while maintaining good accuracy.\footnote{http://aclweb.org/anthology/P/P15/P15-1038.pdf}
 
 ...smh more about spacy?...
 
@@ -709,7 +709,7 @@ If we are able to identify all the keywords, we continue to another phase, wich 
 
 In all the articles in our database, we then try to find sentences containing all the previously mentioned searchwords. If we are unable to find such sentences, we do not try to answer the question. While one might argue that the presence of all entities in a sentence is not required for the sentence to contain the answer, we would be exposing ourselves to a lot of noise by downplaying these conditions.
 
-After finding as much sentences as we can, the system begins its most important task - classification.
+After finding as much sentences as we can, the system begins its most important task --- classification.
 
 \subsection{Classification vs Relevance}
 
@@ -727,6 +727,8 @@ Also the presented task proved to be confusing for many mTurk users who answered
 After realizing the 2 classifiers option was not viable, we began to look for a model that would, ideally, deal with both classification and relevance at the same time.
 
 Lets suppose we have the full information on both classification and relevance. This means that the unrelevant sentences has relevance '0' and we dont care about its classification. On the other hand, relevant sentences have relevance '1' and we do care about its classification. If we have an access to the full information, the straightforward approach would be to average the classification of all relevant sentences (while some sentences may contradict each other, we care about the majority answer). This, however, introduces unsmoothness to the value function. So how can we rewrite the function while preserving the smoothness for an easy gradient descent?
+
+---TODO: elaborate on smoothness, may be confusing people not familiar with gradient descent
 
 We propose the following model:\\
 
@@ -749,7 +751,7 @@ $$a(wc_i) \in  \left\langle 0,1\right\rangle , \quad a(qr_i) > 0$$
 
 \item\textbf{Object, Subject match:} Two straightforward features, return '1' if question-sentence subjects (or subject-object) match, otherwise '0'.
 
-\item\textbf{Verb similarity:} Because we do not search the database for verb in the question itself, we introduce verb similarity features. These features output a number $\in \left\langle 0,1\right\rangle$ capturing linguistical similarity of those words. We use WordNet and spacy, each with its own feature.
+\item\textbf{Verb similarity:} Because we do not search the database for verb in the question itself, we introduce verb similarity features. These features output a number $\in \left\langle 0,1\right\rangle$ capturing linguistical similarity of those words. We use WordNet and spacy (word embeddings), each with its own feature.
 \end{itemize}
 
 \subsubsection{Relevance}
@@ -765,9 +767,9 @@ $$a(wc_i) \in  \left\langle 0,1\right\rangle , \quad a(qr_i) > 0$$
 \subsection{RNN}
 Perhaps the most important feature implemented so far is a recurrent neural network (RNN). The network uses GloVe word embeddings for converting words to numerical vectors. 
 
----how rnn works? (not necessary)---
+---how rnn works? (formulas not necessary, but borrow some simple diagram figure from somewhere; GRU!)---
 
-The outputs of the RNN are then sent side by side to a simple dense layer, wich oitputs a single scalar (vector) representing its value.
+The outputs of the RNN are then sent side by side to a simple dense layer, wich outputs a single scalar (vector) representing its value.
 
 The model was tried separately, only as a classification feature and achieved accuracy over 78\%, a little more then all the other simple features put together (75\%).
 
@@ -776,7 +778,7 @@ The model was tried separately, only as a classification feature and achieved ac
 	\centering
 	\includegraphics[width=15cm]{clasrelfull}
 	\caption{The full model.}
-	\label{fig:w2vg}
+	\label{fig:clasrelfull}
 \end{figure}
 \subsection{Results, comparison}
 ...
