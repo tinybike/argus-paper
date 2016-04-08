@@ -690,14 +690,26 @@ should not take more than (low) hundreds of megabytes of data.  This
 paints a bright future for decentralized Argus that runs on many
 distributed nodes independently.
 
+\newcommand{\gray}[1]{\Large \textcolor{gray}{#1} \normalsize}
+\newcommand{\olive}[1]{\Large \textcolor{olive}{\textbf{#1}}\normalsize}
+\newcommand{\brown}[1]{\Large \textcolor{brown}{\textit{#1}}\normalsize}
+\newcommand{\other}[1]{\Large \textcolor{orange}{\textit{#1}}\normalsize}
+
+
 
 \section{The real system}
 \label{real}
 
+\subsection{Data}
+We created our own data set with help from Amazon Mechanical Turk (mTurk). The data set consists of pairs question-label with questions on news events from past year on politics, sport and stock market. The original data set consisted of \textasciitilde 250 questions and was expanded with auto-generated questions on big sporting event winners (Did team A win event X?) and various US election results. The currently used data set has \textasciitilde 2000 questions.
+
+We would certainly benefit from expanding the data set further, particularly because we do not yet have enough data for a three-way split (train-validation-test) and are only using train-validation split.
+
+
 \subsection{Syphon}
 We picked \textit{spacy} as the dependency parser of choice. Spacy is one of the fastest dependency parsers available  (14000 tokens/s), while maintaining good accuracy.\footnote{http://aclweb.org/anthology/P/P15/P15-1038.pdf}
 
-...smh more about spacy?...
+...more about spacy?...
 
 We use spacy to look for keywords in the posed question. Keywords are all non-numerical entities and also important verbs. We could also just take all the non-stop-words and count them as keywords, however by doing this we would be unable to identify errors made by the dependency parser. 
 
@@ -705,7 +717,14 @@ We use keywords for double checking our understanding of the question: if some n
 
 If we are able to identify all the keywords, we continue to another phase, wich is finding relevant articles. For this we use so called \textit{searchwords}; these are keywords stripped of any verbs. Motivation behind stripping verbs is the fact that we can often express the same meaning using different verbs.
 
----examples---
+Here are some common examples, gray are \textcolor{gray}{stop-words}, bold \textbf{searchwords} and italics \textit{keywords not used for search}.
+
+
+\gray{Will} \olive{Hillary Clinton} \brown{run} \gray{for} \olive{president}\gray{?}
+
+\gray{Will the} \olive{Patriots} \brown{win} \gray{the} \other{2015} \olive{Super Bowl}\gray{?}
+
+\gray{Will} \olive{gay marriage} \gray{be} \brown{legalized} \gray{in} \other{2015}\gray{?}
 
 In all the articles in our database, we then try to find sentences containing all the previously mentioned searchwords. If we are unable to find such sentences, we do not try to answer the question. While one might argue that the presence of all entities in a sentence is not required for the sentence to contain the answer, we would be exposing ourselves to a lot of noise by downplaying these conditions.
 
@@ -716,7 +735,29 @@ After finding as much sentences as we can, the system begins its most important 
 After brief error analysis it became obvious that the main problem for any used classifier will be the extreme noise presented in the data. Approximately 80\% of all found sentences were irrelevant to the posed question. While on topic (all searchwords have to be present in the sentence), 
 the sentences did not directly address the question or the answers were outdated.
 
---examples--
+Some examples of \textcolor{olive}{relevant} and \textcolor{red}{unrelevant} sentences are:
+
+Will Hillary Clinton run for president?
+
+\textcolor{olive}{Hillary Clinton announced on Sunday that she was running for president of the United States.}
+
+\textcolor{red}{Why Hillary Clinton would make the perfect US president.}
+
+\noindent\rule{8cm}{0.4pt}
+
+Will the Patriots win the 2015 Super Bowl?
+
+\textcolor{olive}{Super Bowl XLIX: Patriots beat Seahawks}
+
+\textcolor{red}{Could the New England Patriots miss out on the Super Bowl?}
+
+\noindent\rule{8cm}{0.4pt}
+
+Will the Patriots win the 2015 Super Bowl?
+
+\textcolor{olive}{US Supreme Court legalises gay marriage}
+
+\textcolor{red}{Anti-gay marriage video by US pressure group CatholicVote plays victim card}
 
 One obvious approach would be to implement a second classifier that would decide if the presented sentence is relevant to the posed question. 
 
@@ -752,6 +793,11 @@ $$a(w^Tc_i) \in  \left\langle 0,1\right\rangle , \quad a(q^Tr_i) > 0$$
 \item\textbf{Object, Subject match:} Two straightforward features, return '1' if question-sentence subjects (or subject-object) match, otherwise '0'.
 
 \item\textbf{Verb similarity:} Because we do not search the database for verb in the question itself, we introduce verb similarity features. These features output a number $\in \left\langle 0,1\right\rangle$ capturing linguistical similarity of those words. We use WordNet and spacy (word embeddings), each with its own feature.
+
+\item\textbf{Sport score:} A special team-score matching feature for precise answers - it is common for sport articles to present numerical match results in headlines.
+
+\item\textbf{Binary features:} All of the above features are expanded with another feature that returns '1' when the original feature is '0'. The fact that a feature has '0' value is an information in itself, however linear models discard this information (due to their linear character).
+
 \end{itemize}
 
 \subsubsection{Relevance}
