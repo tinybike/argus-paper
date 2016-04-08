@@ -691,10 +691,10 @@ should not take more than (low) hundreds of megabytes of data.  This
 paints a bright future for decentralized Argus that runs on many
 distributed nodes independently.
 
-\newcommand{\gray}[1]{\Large \textcolor{gray}{#1} \normalsize}
-\newcommand{\olive}[1]{\Large \textcolor{olive}{\textbf{#1}}\normalsize}
-\newcommand{\brown}[1]{\Large \textcolor{brown}{\textit{#1}}\normalsize}
-\newcommand{\other}[1]{\Large \textcolor{orange}{\textit{#1}}\normalsize}
+\newcommand{\gray}[1]{\textcolor{gray}{#1}}
+\newcommand{\olive}[1]{\textcolor{olive}{\textbf{#1}}}
+\newcommand{\brown}[1]{\textcolor{brown}{\textit{#1}}}
+\newcommand{\other}[1]{\textcolor{orange}{\textit{#1}}}
 
 
 
@@ -720,12 +720,15 @@ If we are able to identify all the keywords, we continue to another phase, wich 
 
 Here are some common examples, gray are \textcolor{gray}{stop-words}, bold \textbf{searchwords} and italics \textit{keywords not used for search}.
 
+\begin{itemize}
 
-\gray{Will} \olive{Hillary Clinton} \brown{run} \gray{for} \olive{president}\gray{?}
+\item \gray{Will} \olive{Hillary Clinton} \brown{run} \gray{for} \olive{president}\gray{?}
 
-\gray{Will the} \olive{Patriots} \brown{win} \gray{the} \other{2015} \olive{Super Bowl}\gray{?}
+\item \gray{Will the} \olive{Patriots} \brown{win} \gray{the} \other{2015} \olive{Super Bowl}\gray{?}
 
-\gray{Will} \olive{gay marriage} \gray{be} \brown{legalized} \gray{in} \other{2015}\gray{?}
+\item \gray{Will} \olive{gay marriage} \gray{be} \brown{legalized} \gray{in} \other{2015}\gray{?}
+
+\end{itemize}
 
 In all the articles in our database, we then try to find sentences containing all the previously mentioned searchwords. If we are unable to find such sentences, we do not try to answer the question. While one might argue that the presence of all entities in a sentence is not required for the sentence to contain the answer, we would be exposing ourselves to a lot of noise by downplaying these conditions.
 
@@ -738,7 +741,9 @@ the sentences did not directly address the question or the answers were outdated
 
 Some examples of \textcolor{olive}{relevant} and \textcolor{red}{unrelevant} sentences are:
 
-Will Hillary Clinton run for president?
+\begin{itemize}
+
+\item Will Hillary Clinton run for president?
 
 \textcolor{olive}{Hillary Clinton announced on Sunday that she was running for president of the United States.}
 
@@ -746,7 +751,7 @@ Will Hillary Clinton run for president?
 
 \noindent\rule{8cm}{0.4pt}
 
-Will the Patriots win the 2015 Super Bowl?
+\item Will the Patriots win the 2015 Super Bowl?
 
 \textcolor{olive}{Super Bowl XLIX: Patriots beat Seahawks}
 
@@ -754,11 +759,13 @@ Will the Patriots win the 2015 Super Bowl?
 
 \noindent\rule{8cm}{0.4pt}
 
-Will the Patriots win the 2015 Super Bowl?
+\item Will gay marriage be legalized in 2015?
 
 \textcolor{olive}{US Supreme Court legalises gay marriage}
 
 \textcolor{red}{Anti-gay marriage video by US pressure group CatholicVote plays victim card}
+
+\end{itemize}
 
 One obvious approach would be to implement a second classifier that would decide if the presented sentence is relevant to the posed question. 
 
