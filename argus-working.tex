@@ -872,6 +872,7 @@ In the end, the human-provided labels had too high a level of noise to be helpfu
 Therefore, implementing a separate relevancy classifier was not viable due to lack of a good training dataset.
 
 \subsection{ML: Our Proposed ``ClasRel'' Model}
+\label{sec:clasrel}
 %After realizing the two-classifier option was not viable, we began to look for a model that would, ideally, deal with both classification and relevance at the same time.
 
 One of our main scientific as well as practical contributions so far is
@@ -907,7 +908,7 @@ We use sigmoid activation functions for both classification and relevance output
 $$a(w^Tc_i) \in  [0,1] \qquad a(q^Tr_i) > 0$$
 Therefore, we use a logistic linear model for determining $C_i$ and $R_i$ based on the feature values.
 
-\subsection{Used Features}
+\subsection{ML: Used Features}
 \subsubsection{Classification}
 \begin{itemize}
 \item \textbf{Sentiment:} One of the first few features introduced when building the system, originally strong but now fairly weak. The idea is, that if both the question and the sentence are both positive (negative), they should be consistent with each other. The sentiment feature extract keyword-based sentiment score (sum of weighted emotionaly-colored words) for the question and each sentence.
@@ -933,24 +934,29 @@ Therefore, we use a logistic linear model for determining $C_i$ and $R_i$ based 
 
 \end{itemize}
 
-\subsection{RNN}
-In addition to the features above, we introduce a recurrent neural network output as another feature both for relevance and classification.
+\subsection{ML: Neural network}
+In addition to the features above, we introduce a GRU-based Recurrent Neural Network output as another feature both for relevance and classification,
+as illustrated in Fig.~\ref{fig:clasrelfull}.
 
-Perhaps the most important feature implemented so far is a recurrent neural network (RNN). The network uses GloVe word embeddings for converting words to numerical vectors. 
-
----how rnn works? (formulas not necessary, but borrow some simple diagram figure from somewhere; GRU!)---
-
-The outputs of the RNN are then sent side by side to a simple dense layer, wich outputs a single scalar (vector) representing its value.
-
-The model was tried separately, only as a classification feature and achieved accuracy over 78\%, a little more then all the other simple features put together (75\%).
-
-\subsection{Full model}
-\begin{figure}[ht]
+\begin{figure}[t]
 	\centering
-	\includegraphics[width=15cm]{clasrelfull}
-	\caption{The full model.}
+	\includegraphics[width=6cm]{clasrelfull}
+	\caption{The full model with RNN included.}
 	\label{fig:clasrelfull}
 \end{figure}
+
+At a high level,%
+\footnote{Details of the operation are described in \url{http://arxiv.org/abs/1603.06127}.}
+the neural network processes both the question sentence and the evidence sentence
+(with GloVe word embeddings at the input rather than raw words)
+and produces an aggregate numerical vector for each of the sentences that should summarize the sentence meaning.
+For both classification and relevancy, a custom measure is trained that compares the numerical vectors and produces a single scalar value for each evidence, to be used in the respective feature vector.
+
+As far as we know, this is the first time an RNN is used to decide a single answer for a question and a set of sentences (though the Memory Networks are superficially similar).
+The RNN itself is trained jointly with the rest of the model described in Sec.~\ref{sec:clasrel}.
+The text comprehension provided by the RNN is crucial to our current accuracy, and largely complementary to the other features listed above.
+The model was tried separately, only as a classification feature and achieved accuracy over 78\%, a little more then all the other simple features put together (75\%).
+
 \subsection{Results, comparison}
 ...
 
