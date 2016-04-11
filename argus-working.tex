@@ -773,11 +773,20 @@ articles processed, but these changes should be trivial.
 
 \subsection{Syphon}
 
-We use spacy to look for keywords in the posed question. Keywords are all non-numerical entities and also important verbs. We could also just take all the non-stop-words and count them as keywords, however by doing this we would be unable to identify errors made by the dependency parser. 
+The Syphon component task is to a priori filter out the questions we
+cannot answer (\textit{fail in doubt} to maximize precision at the cost of recall, allowing
+the system to be used as a reasonably reliable component) as well
+as to build up the question representation which can be used for
+the machine learning component.
+
+We use spacy to look for keywords in the posed question. Keywords are all non-numerical entities and also important verbs. We could also just take all the non-stop-words and count them as keywords, however by doing this we would be unable to identify errors made by the dependency parser.
 
 We use keywords for double checking our understanding of the question: if some non-stop-words are missing from keywords, we do not attempt to answer (this might change in the future).
 
-If we are able to identify all the keywords, we continue to another phase, wich is finding relevant articles. For this we use so called \textit{searchwords}; these are keywords stripped of any verbs. Motivation behind stripping verbs is the fact that we can often express the same meaning using different verbs.
+If we are able to identify all the keywords, we continue to another phase, wich is finding relevant articles.
+For this we use so called \textit{search words}; these are keywords stripped of any verbs.
+Motivation behind stripping verbs is the fact that we can often express the same meaning using different verbs
+and the Wordnet coverage of synonyms turned out to be too strict.
 
 Here are some common examples, gray are \textcolor{gray}{stop-words}, bold \textbf{searchwords} and italics \textit{keywords not used for search}.
 
@@ -794,6 +803,16 @@ Here are some common examples, gray are \textcolor{gray}{stop-words}, bold \text
 In all the articles in our database, we then try to find sentences containing all the previously mentioned searchwords. If we are unable to find such sentences, we do not try to answer the question. While one might argue that the presence of all entities in a sentence is not required for the sentence to contain the answer, we would be exposing ourselves to a lot of noise by downplaying these conditions.
 
 After finding as much sentences as we can, the system begins its most important task --- classification.
+
+\textbf{Lessons Learned:}  We ended up following the fairly strict
+approach outlined originally, because it allows us to accept more
+than half of the questions, a satisfying proportion, and keep the
+precision high.
+It also introduces a clear bias towards rejecting ``No''-questions,
+as predicted, reliably answering ``No'' is more challenging than
+confirming (but this still keeps the potential of the system to
+help out at answering a large chunk of questions; checking the yes / no
+bias in real-world Augur questions would be interesting).
 
 \subsection{Classification vs Relevance}
 
