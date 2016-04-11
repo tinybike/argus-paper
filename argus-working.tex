@@ -904,20 +904,22 @@ The basic model then consists of classification feature vectors $c_i$ (see below
 \[ y  = \dfrac{\sum_i \sigma(w^Tc_i)\sigma(q^Tr_i)}{\sum_i \sigma(q^Tr_i)}
 \]
 We use sigmoid activation functions for both classification and relevance outputs, although other options are available. There are two limitations on the used functions:
-$$a(w^Tc_i) \in  [0,1] , \quad a(q^Tr_i) > 0$$
+$$a(w^Tc_i) \in  [0,1] \qquad a(q^Tr_i) > 0$$
+Therefore, we use a logistic linear model for determining $C_i$ and $R_i$ based on the feature values.
 
 \subsection{Used Features}
 \subsubsection{Classification}
 \begin{itemize}
-\item \textbf{Sentiment:} One of the first few features introduced when building the system. The idea is, that if both the question and the sentence are both positive (negative), they should be consistent with each other. The sentiment feature extract some sentiment score (sum of weighted emotionaly-colored words) for the question and each sentence.
+\item \textbf{Sentiment:} One of the first few features introduced when building the system, originally strong but now fairly weak. The idea is, that if both the question and the sentence are both positive (negative), they should be consistent with each other. The sentiment feature extract keyword-based sentiment score (sum of weighted emotionaly-colored words) for the question and each sentence.
 
 \item\textbf{Object, Subject match:} Two straightforward features, return '1' if question-sentence subjects (or subject-object) match, otherwise '0'.
 
-\item\textbf{Verb similarity:} Because we do not search the database for verb in the question itself, we introduce verb similarity features. These features output a number $\in \left\langle 0,1\right\rangle$ capturing linguistical similarity of those words. We use WordNet and spacy (word embeddings), each with its own feature.
+\item\textbf{Verb similarity:} Because we do not search the database for verb in the question itself, we introduce verb similarity features. These features output a number $\in [0,1]$ capturing linguistical similarity of those words. We use WordNet thesaurus distance and word embeddings alignment, each with its own feature.%
+\footnote{One lesson learned here is that naive approaches such as this one do not work well for distinguishing synonyms and antonyms, a crucial distinction for us.  It seems the neural network (see below) seomwhat redeems this.}
 
 \item\textbf{Sport score:} A special team-score matching feature for precise answers - it is common for sport articles to present numerical match results in headlines.
 
-\item\textbf{Binary features:} All of the above features are expanded with another feature that returns '1' when the original feature is '0'. The fact that a feature has '0' value is an information in itself, however linear models discard this information (due to their linear character).
+\item\textbf{Binary features:} All of the above features are expanded with another feature that returns '1' when the original feature is '0'. The fact that a feature has '0' value is an information in itself, however linear models would otherwise discard this information.
 
 \end{itemize}
 
@@ -925,13 +927,15 @@ $$a(w^Tc_i) \in  [0,1] , \quad a(q^Tr_i) > 0$$
 \begin{itemize}
 \item \textbf{Date distance:} It is important to differentiate between relevant and outdated information. Using spacy, we extract time information from the question (if possible). Each article in our news database also contains its release date. This feature returns a number, depending on the time distance between the question and sentence.
 
-\item\textbf{Elastic score:} Internal search score of the elasticsearch database, we count more if elastic found words in the headline or snippet.
+\item\textbf{Elastic score:} Internal search score of the ElasticSearch fulltext index database, with a bonus if the search found words in the headline or snippet.
 
 \item\textbf{Object, Subject match:} Same as classification.
 
-
 \end{itemize}
+
 \subsection{RNN}
+In addition to the features above, we introduce a recurrent neural network output as another feature both for relevance and classification.
+
 Perhaps the most important feature implemented so far is a recurrent neural network (RNN). The network uses GloVe word embeddings for converting words to numerical vectors. 
 
 ---how rnn works? (formulas not necessary, but borrow some simple diagram figure from somewhere; GRU!)---
