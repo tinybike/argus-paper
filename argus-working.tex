@@ -758,7 +758,7 @@ reused from an earlier project of ours, \texttt{brmson/Sentence-selection})
 and finally we moved to the \textbf{Keras} deep learning toolkit that
 allows us to also leverage deep neural networks for sentence processing.
 
-Rather than nltk, we picked \textit{spacy} for the NLP processing,
+Rather than nltk, we picked \textbf{spacy} for the NLP processing,
 especially as the dependency parser of choice. Spacy is one of
 the fastest dependency parsers available (14000 tokens/s), while maintaining good accuracy.\footnote{http://aclweb.org/anthology/P/P15/P15-1038.pdf}
 It also makes for a much more pleasant and consistent NLP library,
@@ -946,7 +946,8 @@ as illustrated in Fig.~\ref{fig:clasrelfull}.
 \end{figure}
 
 At a high level,%
-\footnote{Details of the operation are described in \url{http://arxiv.org/abs/1603.06127}.}
+\footnote{Details of the operation are described in \url{http://arxiv.org/abs/1603.06127},
+the model implementation has been largely reused from the \texttt{brmson/dataset-sts} project.}
 the neural network processes both the question sentence and the evidence sentence
 (with GloVe word embeddings at the input rather than raw words)
 and produces an aggregate numerical vector for each of the sentences that should summarize the sentence meaning.
@@ -957,12 +958,23 @@ The RNN itself is trained jointly with the rest of the model described in Sec.~\
 The text comprehension provided by the RNN is crucial to our current accuracy, and largely complementary to the other features listed above.
 The model was tried separately, only as a classification feature and achieved accuracy over 78\%, a little more then all the other simple features put together (75\%).
 
-\subsection{Results, comparison}
-...
+\subsection{Accuracy Results}
 
+TODO -- we are still revising our final testing methodology and performing noise-reduction $n$-run tests.
 
+\subsection{Future Work}
 
+To further improve the accuracy of our model, a larger dataset of questions will probably be necessary.
+An alternative way to improve the number of samples would be to reduce the Syphon strictness,
+though that might have repercussions to the system reliability as a whole
+(since our dataset does not cover many apriori nonsensical or very hard questions).
 
+An option we currently intensely investigate is reusing neural network models across tasks.
+The overarching idea is that we could train a general ``text comprehension'' neural network
+model on multiple tasks with large amounts of training data, then reuse this fixed model
+on other tasks with only small amounts of data available (with only the final output
+of the network, which is task specific, kept adaptable during training).
+We have already had the first positive results with such a model transfer.
 
 
 
