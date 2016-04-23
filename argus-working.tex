@@ -23,7 +23,7 @@
 
 \def\TODO{{\bf ??? }}
 
-\title{Argus: Deciding Questions about Events \\ (working paper v1.3pre)}
+\title{Argus: Deciding Questions about Events \\ (working paper v1.3pre2)}
 \author{Petr Baudiš \\ Ailao}
 
 \begin{document}
@@ -714,9 +714,11 @@ system accuracy.
 
 \subsection{Question Dataset}
 
-We created our own data set with help from Amazon Mechanical Turk (mTurk). The data set consists of pairs question-label with questions on news events from past year on politics, sport and stock market. The original mTurk data set consisted of \textbf{\textasciitilde 250 questions} and was expanded with auto-generated questions on big sporting event winners (like \textit{Did team A win event X?}) and various US election results. The currently used data set has \textbf{\textasciitilde 2000 questions}.
+We created our own data set with help from Amazon Mechanical Turk (mTurk). The data set consists of pairs question-label with questions on news events from past year on politics, sport and stock market. The original mTurk data set consisted of \textbf{\textasciitilde 250 questions} and was expanded with auto-generated questions on big sporting event winners (like \textit{Did team A win event X?}) and various US election results. Furthermore, the dataset was manually revised for typos and many questions were paired with a negative form of the same question, to help balance the dataset and better distinguish the form of entailment in addition to relevance of evidence.
 
-We would certainly benefit from expanding the data set further, particularly because we are still barely scraping for enough data to perform a three-way split (train-validation-test) and are only using train-validation split.
+We would certainly benefit from expanding the data set further.
+The currently used data set has \textbf{2427 questions}
+(split to 1839 training, 297 test and 303 validation questions).
 
 \textbf{Lessons Learned:} We would point out the lack of further good data
 as the number one woe of the current system, and believe that finding ways
