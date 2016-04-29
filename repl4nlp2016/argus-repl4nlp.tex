@@ -1,0 +1,212 @@
+%
+% File ACL2016.tex
+%
+
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{acl2016}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{amsfonts}
+\usepackage{url}
+
+\aclfinalcopy % Uncomment this line for the final submission
+%\def\aclpaperid{***} %  Enter the acl Paper ID here
+
+% To expand the titlebox for more authors, uncomment
+% below and set accordingly.
+% \addtolength\titlebox{.5in}    
+
+\newcommand\BibTeX{B{\sc ib}\TeX}
+
+
+\title{Joint Learning of Sentence Embeddings for Relevance and Entailment}
+
+% Author information can be set in various styles:
+% For several authors from the same institution:
+% \author{Author 1 \and ... \and Author n \\
+%         Address line \\ ... \\ Address line}
+% if the names do not fit well on one line use
+%         Author 1 \\ {\bf Author 2} \\ ... \\ {\bf Author n} \\
+% For authors from different institutions:
+% \author{Author 1 \\ Address line \\  ... \\ Address line
+%         \And  ... \And
+%         Author n \\ Address line \\ ... \\ Address line}
+% To start a seperate ``row'' of authors use \AND, as in
+% \author{Author 1 \\ Address line \\  ... \\ Address line
+%         \AND
+%         Author 2 \\ Address line \\ ... \\ Address line \And
+%         Author 3 \\ Address line \\ ... \\ Address line}
+% If the title and author information does not fit in the area allocated,
+% place \setlength\titlebox{<new height>} right after
+% at the top, where <new height> can be something larger than 2.25in
+\author{Petr Baudi\v{s}\\
+	FEE CTU Prague\\
+	Department of Cybernetics\\
+	Technick\'{a} 2, Prague,\\Czech Republic\\
+	{\tt baudipet@fel.cvut.cz}
+	\And
+	Silvestr Stanko\\
+	FEE CTU Prague\\
+	Department of Cybernetics\\
+	Technick\'{a} 2, Prague,\\Czech Republic\\
+	{\tt stanksil@fel.cvut.cz}
+	\And
+	Jan \v{S}ediv\'{y} \\
+	FEE CTU Prague\\
+	Department of Cybernetics\\
+	Technick\'{a} 2, Prague,\\Czech Republic\\
+	{\tt sedivjan@fel.cvut.cz}}
+
+%\author{Author 1\\
+%	    XYZ Company\\
+%	    111 Anywhere Street\\
+%	    Mytown, NY 10000, USA\\
+%	    {\tt author1@xyz.org}
+%	  \And
+%	Author 2\\
+%  	ABC University\\
+%  	900 Main Street\\
+%  	Ourcity, PQ, Canada A1A 1T2\\
+%  {\tt author2@abc.ca}}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+	We consider the problem of Recognizing Textual Entailment
+	within an Information Retrieval context, where we must simultaneously
+	determine the relevancy as well as degree of entailment for individual
+	pieces of evidence to determine a yes/no answer to a binary
+	natural language question.
+
+	We introduce an open dataset of questions and evidence, without
+	explicit evidence supervision, that we use to train a neural model
+	that produces sentence embeddings which are suitable for classifying
+	evidence of varying relevance.  We show that joint training of
+	relevance and entailment is possible and that our proposed model
+	is powerful enough to correctly answer most questions even when
+	given a relatively small dataset, even in the context of
+	strong non-neural IR baselines.
+\end{abstract}
+
+\section{Introduction}
+
+Let us consider the goal of building machine reasoning systems based
+on knowledge from fulltext data like encyclopedic articles, scientific
+papers or news articles.
+Such machine reasoning systems, like humans researching a problem,
+must be able to retrieve evidence from large amounts of retrieved
+but irrelevant information and judge what answer the evidence entails
+to the question at hand.
+
+A typical approach \cite{YodaQAanother}, used implicitly in information retrieval
+(and its extensions, like IR-based Question Answering systems \cite{YodaQA}),
+is to determine evidence relevancy by a keyword overlap feature (like tf-idf or BM-25 \cite{BM25})
+and prune the evidence by the relevancy score.
+On the other hand, textual entialment systems that seek to confirm hypotheses
+based on evidence \cite{RTE} \cite{SNLI} \cite{SICK2014}
+are typically provided with only a single piece of evidence
+or only evidence pre-determined as relevant, and are often restricted
+to short and simple sentences without open-domain named entity occurences.
+
+In this work, we seek to fuse information retrieva and textual entaiment
+recognition by defining the \textbf{Argus Yes/No Question Answering} task.
+The problem is, given a real-world event binary question like
+\textit{Did Donald Trump announce he is running for president?}
+and numerous retrieved news article fragments as evidence,
+to determine the answer for the question.
+
+This problem is motivated by the Argus automatic reporting system for
+the Augur prediction market. \cite{Argus}  Here, we consider it within
+the constraints of a practical task that has limited available dataset
+and only minimum supervision.  Hence, the evidence are authentic news
+sentences (with noise like segmentation errors, irrelevant participial phrases, etc.),
+and whereas we have gold standard for
+the correct answers, the model must do without explicit supervision on
+which individual evidence snippets are relevant and what do they entail.
+
+To this end, we introduce an open dataset of questions and newspaper evidence,
+and a neural model within the Sentence Pair Scoring framework \cite{sts}
+that (A) learns sentence embeddings for the question and evidence,
+(B) the embeddings represent both relevance and entailment characteristics
+as linear classifier inputs, and (C) aggregates all available evidence
+to produce a binary signal as the answer, which is the only training supervision.
+
+The paper is structured as follows.  In Sec.~\ref{sec:argus}, we formally outline
+the Argus question answering task and describe the question-evidence dataset.
+In Sec.~\ref{sec:relwork}, we briefly survey the related work on similar problems,
+whereas in Sec.~\ref{sec:clasrel} we present our ClasRel neural model for joint
+learning of sentence relevance and entailment.  We present the results in Sec.~\ref{sec:res}
+and conclude with a summary and future work directions in Sec.~\ref{sec:concl}.
+
+\section{The Argus Task}
+\label{sec:argus}
+
+\subsection{Dataset}
+
+\section{Related Work}
+\label{sec:relwork}
+
+\section{ClasRel Neural Model}
+\label{sec:clasrel}
+
+\section{Results}
+\label{sec:res}
+
+\subsection{Experimental Setup}
+
+\subsection{Evaluation}
+
+Rnn features only:
+Train: 0.936168 ±0.014544
+Val: 0.883608 ±0.008952
+Test: 0.829114 ±0.011312
+
+Avg features only:
+Train: 0.917400 ±0.003061
+Val: 0.768713 ±0.009674
+Test: 0.678006 ±0.009330
+
+cnn features only:
+Train: 0.959917 ±0.009605
+Val: 0.880988 ±0.014256
+Test: 0.821994 ±0.020737
+
+attn1511 features only:
+Train: 0.936399 ±0.011737
+Val: 0.899701 ±0.008580
+Test: 0.854430 ±0.009165
+
+Average end-to-end: argus tests, commit 0addc0d - 3d input, na konci mean
+classification (uniform relevance), classification by rnn:
+Train: 0.730074 ±0.008370
+Val: 0.729042 ±0.006503
+Test: 0.674842 ±0.012944
+
+relevance by BM25:
+TODO
+
+\subsection{Embeddings Analysis}
+
+\section{Conclusion}
+\label{sec:concl}
+
+
+\section*{Acknowledgments}
+{\footnotesize
+	This work was co-funded by the Augur Project of the Forecast Foundation
+and financially supported by the Grant Agency of the Czech Technical
+University in Prague, grant No. SGS16/ 084/OHK3/1T/13.
+Computational resources were provided by the CESNET LM2015042 and the CERIT Scientific Cloud LM2015085,
+provided under the programme ``Projects of Large Research, Development, and Innovations Infrastructures.''
+
+We'd like to thank Perry Despeiges of the Augur Project for his support.}
+
+\bibliography{sps}
+\bibliographystyle{acl2016}
+
+\end{document}
