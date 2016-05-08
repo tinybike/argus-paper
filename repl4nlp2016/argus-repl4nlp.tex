@@ -103,7 +103,7 @@ are typically provided with only a single piece of evidence
 or only evidence pre-determined as relevant, and are often restricted
 to short and simple sentences without open-domain named entity occurences.
 
-In this work, we seek to fuse information retrieva and textual entaiment
+In this work, we seek to fuse information retrieval and textual entaiment
 recognition by defining the \textbf{Argus Yes/No Question Answering} task.
 The problem is, given a real-world event binary question like
 \textit{Did Donald Trump announce he is running for president?}
@@ -111,8 +111,8 @@ and numerous retrieved news article fragments as evidence,
 to determine the answer for the question.
 
 This problem is motivated by the Argus automatic reporting system for
-the Augur prediction market. \cite{argus}  Here, we consider it within
-the constraints of a practical task that has limited available dataset
+the Augur prediction market. \cite{argus}  Therefore, we consider the question answering task
+within the constraints of a practical task that has limited available dataset
 and only minimum supervision.  Hence, the evidence are authentic news
 sentences (with noise like segmentation errors, irrelevant participial phrases, etc.),
 and whereas we have gold standard for
@@ -232,18 +232,42 @@ of the dataset is outlined in Fig.~\ref{tab:dataset}.
 \section{Related Work}
 \label{sec:relwork}
 
-MemNN, RTE
+Our primary concern when integrating natural language query and
+textual evidence is to build sentence-level representations that
+can be used both for relevance weighing and answer prediction.
 
-Bordes KB embeddings
+Sentence-level representations in the retrieval + inference context have been
+popularly proposed within the Memory Network framework \cite{MemNN},
+but just averaged word embeddings are explored; the task includes
+only very simple sentences and a small vocabulary.
+Much more realistic setting is introduced in the Answer Sentence Selection
+context \cite{AnsselWang} \cite{sps}, with state-of-art models using complex
+deep neural architectures with attention \cite{attnpooling}, but ths selection
+task consists of only retrieval and no inference (answer prediction).
+A more indirect retrieval task regarding news summarization was investigated
+by \cite{AttSum}.
 
-Question Analysis and Answer Passage Retrieval for Opinion Question Answering Systems 
-http://140.109.19.106/clclp/v13n3/v13n3a3.pdf
+In the entailment context, \cite{SNLI} introduced a large dataset
+with single-evidence sentence pairs (Stanford Natural Language Inference, SNLI),
+but a larger vocabulary and
+slightly more complicated (but still conservatively formed) sentences
+They also proposed baseline recurrent neural model for modeling
+sentence representations, while word-level attention based models
+are studied more recently \cite{SNLIattn} \cite{LSTMMR}.
 
-Attention-Based Convolutional Neural Network for Machine Comprehension
-http://arxiv.org/pdf/1602.04341v1.pdf
+TODO SICK-2014
 
-AttSum: Joint Learning of Focusing and Summarization with Neural Attention
-http://arxiv.org/pdf/1604.00125v1.pdf
+The most similar task to the binary question answering we consider
+is the MCTest text comprehension challenge \cite{MCTest}, where
+users are presented with short stories and are asked to answer multiple
+choice questions about details of these stories.  The state-of-art model
+of \cite{HABCNN} uses convolutional neural networks to build sentence
+representations, and attention on multiple levels to select evidencing
+sentences.
+However, the practical setting differs as the MCTest dataset contains
+relatively restricted vocabulary and well-formed sentences; furthermore,
+the goal is to find the single key point in the story to focus on, while
+in our setting we may have many pieces of evidence supporting an answer.
 
 \section{ClasRel Neural Model}
 \label{sec:clasrel}
