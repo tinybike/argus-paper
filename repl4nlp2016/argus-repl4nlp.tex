@@ -40,23 +40,13 @@
 % If the title and author information does not fit in the area allocated,
 % place \setlength\titlebox{<new height>} right after
 % at the top, where <new height> can be something larger than 2.25in
-\author{Petr Baudi\v{s}\\
-	FEE CTU Prague\\
-	Department of Cybernetics\\
-	Technick\'{a} 2, Prague,\\Czech Republic\\
-	{\tt baudipet@fel.cvut.cz}
-	\And
-	Silvestr Stanko\\
-	FEE CTU Prague\\
-	Department of Cybernetics\\
-	Technick\'{a} 2, Prague,\\Czech Republic\\
-	{\tt stanksil@fel.cvut.cz}
-	\And
+\author{Petr Baudi\v{s},
+	Silvestr Stanko \and
 	Jan \v{S}ediv\'{y} \\
 	FEE CTU Prague\\
 	Department of Cybernetics\\
 	Technick\'{a} 2, Prague,\\Czech Republic\\
-	{\tt sedivjan@fel.cvut.cz}}
+	{\tt baudipet@fel.cvut.cz}}
 
 %\author{Author 1\\
 %	    XYZ Company\\
@@ -103,12 +93,12 @@ must be able to retrieve evidence from large amounts of retrieved
 but irrelevant information and judge what answer the evidence entails
 to the question at hand.
 
-A typical approach \cite{YodaQAanother}, used implicitly in information retrieval
-(and its extensions, like IR-based Question Answering systems \cite{YodaQA}),
+A typical approach, used implicitly in information retrieval
+(and its extensions, like IR-based Question Answering systems \cite{YodaQAPoster2015}),
 is to determine evidence relevancy by a keyword overlap feature (like tf-idf or BM-25 \cite{BM25})
 and prune the evidence by the relevancy score.
 On the other hand, textual entialment systems that seek to confirm hypotheses
-based on evidence \cite{RTE} \cite{SNLI} \cite{SICK2014}
+based on evidence \cite{RTE1} \cite{SICK2014} \cite{SNLI}
 are typically provided with only a single piece of evidence
 or only evidence pre-determined as relevant, and are often restricted
 to short and simple sentences without open-domain named entity occurences.
@@ -130,7 +120,7 @@ the correct answers, the model must do without explicit supervision on
 which individual evidence snippets are relevant and what do they entail.
 
 To this end, we introduce an open dataset of questions and newspaper evidence,
-and a neural model within the Sentence Pair Scoring framework \cite{sts}
+and a neural model within the Sentence Pair Scoring framework \cite{sps}
 that (A) learns sentence embeddings for the question and evidence,
 (B) the embeddings represent both relevance and entailment characteristics
 as linear classifier inputs, and (C) the model aggregates all available evidence
@@ -249,6 +239,12 @@ Bordes KB embeddings
 Question Analysis and Answer Passage Retrieval for Opinion Question Answering Systems 
 http://140.109.19.106/clclp/v13n3/v13n3a3.pdf
 
+Attention-Based Convolutional Neural Network for Machine Comprehension
+http://arxiv.org/pdf/1602.04341v1.pdf
+
+AttSum: Joint Learning of Focusing and Summarization with Neural Attention
+http://arxiv.org/pdf/1604.00125v1.pdf
+
 \section{ClasRel Neural Model}
 \label{sec:clasrel}
 
@@ -302,9 +298,9 @@ University in Prague, grant No. SGS16/ 084/OHK3/1T/13.
 Computational resources were provided by the CESNET LM2015042 and the CERIT Scientific Cloud LM2015085,
 provided under the programme ``Projects of Large Research, Development, and Innovations Infrastructures.''
 
-We'd like to thank Peronet Despeiges of the Augur Project for his support.}
+We'd like to thank Peronet Despeignes of the Augur Project for his support.}
 
-\bibliography{sps}
+\bibliography{qa,sps,argus}
 \bibliographystyle{acl2016}
 
 \end{document}
