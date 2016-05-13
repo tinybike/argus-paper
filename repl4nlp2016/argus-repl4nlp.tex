@@ -173,7 +173,7 @@ from an evidence-carrying corpus.
 TODO: example
 
 
-\subsection{Dataset}
+\subsection{Argus Dataset}
 
 To help develop a machine learning model for the $f_h$ function,
 we have created a dataset of questions with gold labels, and used
@@ -229,6 +229,54 @@ of the dataset is outlined in Fig.~\ref{tab:dataset}.
 \end{figure}
 
 
+\subsection{MCTest Dataset}
+
+The \textbf{Machine Comprehension Test} \cite{MCTest} dataset has been introduced
+to provide a challenge for researchers to come up with models that approach
+human-level reading comprehension, and serve as a higher-level alternative
+to semantic parsing tasks that enforce a specific knowledge representation.
+The dataset consists of a set of 660 stories spanning
+multiple sentences, written in simple and clean language (but with less restricted
+vocabulary than e.g.\ the bAbI dataset \cite{bAbI}).  Each story is accompanied
+by four questions, each with four possible answers; the questions are tagged
+as based on just a single in-story sentence, or requiring multiple sentence inference.
+We use an official extension of the dataset for RTE evaluation
+that replaces answers by full statements that combine each answer with the question.
+
+The dataset is split in two parts, MC-160 and MC-500, based on provenance but
+similar in quality.
+We report performance on both parts separately to be comparable with earlier
+work, as well as on a joined version MC-660 in order to increase evaluation
+accuracy.  We always train the model on the joined version training set.
+
+The practical setting differs from the Argus task as the MCTest dataset contains
+relatively restricted vocabulary and well-formed sentences; furthermore,
+the goal is to find the single key point in the story to focus on, while
+in our setting we may have many pieces of evidence supporting an answer.
+
+
+\subsection{AI2-8grade/CK12 Dataset}
+
+The \textbf{AI2 Elementary School Science Questions} (no-diagrams variant)%
+\footnote{http://allenai.org/data.html} released by the Allen Institute
+cover 855 basic four-choice questions regarding high school science
+and follows up to the Allen AI Science Kaggle challenge.%
+\footnote{https://www.kaggle.com/c/the-allen-ai-science-challenge}
+The vocabulary includes scientific jargon and named entities, and many questions
+are not factoid, requiring real-world reasoning or thought experiments.
+
+We have combined each answer with the respective question (crudely by
+substituting wh-word in the question with the answer) and retrieved
+evidence sentences for each hypothesis using Solr search in a collection
+of CK-12 ``Concepts B'' textbooks.%
+\footnote{We have also tried, but the dataset is much harder.}
+525 questions attained any supporting evidence.
+
+We consider this dataset as preliminary, because it was not reviewed
+by a human and many hypotheses are apparently unprovable by the evidence
+we have gathered.
+
+
 \section{Related Work}
 \label{sec:relwork}
 
@@ -257,17 +305,12 @@ are studied more recently \cite{SNLIattn} \cite{LSTMMR}.
 
 TODO SICK-2014
 
-The most similar task to the binary question answering we consider
-is the MCTest text comprehension challenge \cite{MCTest}, where
-users are presented with short stories and are asked to answer multiple
-choice questions about details of these stories.  The state-of-art model
+In the MCTest text comprehension challenge \cite{MCTest}, the
+best models use complex feature engineering ensembling multiple traditional
+semantic NLP approaches, while the best deep model so far
 of \cite{HABCNN} uses convolutional neural networks to build sentence
 representations, and attention on multiple levels to select evidencing
 sentences.
-However, the practical setting differs as the MCTest dataset contains
-relatively restricted vocabulary and well-formed sentences; furthermore,
-the goal is to find the single key point in the story to focus on, while
-in our setting we may have many pieces of evidence supporting an answer.
 
 \section{ClasRel Neural Model}
 \label{sec:clasrel}
@@ -322,7 +365,9 @@ University in Prague, grant No. SGS16/ 084/OHK3/1T/13.
 Computational resources were provided by the CESNET LM2015042 and the CERIT Scientific Cloud LM2015085,
 provided under the programme ``Projects of Large Research, Development, and Innovations Infrastructures.''
 
-We'd like to thank Peronet Despeignes of the Augur Project for his support.}
+We'd like to thank Peronet Despeignes of the Augur Project for his support.
+Carl Burke has provided instructions for searching CK-12 ebooks within
+the Kaggle challenge.}
 
 \bibliography{qa,sps,argus}
 \bibliographystyle{acl2016}
