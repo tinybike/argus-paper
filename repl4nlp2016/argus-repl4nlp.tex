@@ -73,14 +73,20 @@
 	pieces of evidence to determine a yes/no answer to a binary
 	natural language question.
 
-	We introduce an open dataset of questions and evidence, without
-	explicit evidence supervision, that we use to train a neural model
-	that produces sentence embeddings which are suitable for classifying
-	evidence of varying relevance.  We show that joint training of
-	relevance and entailment is possible and that our proposed model
+	We compare several neural network variants for sentence embeddings
+	in a setting of decision-making based on evidence of varying relevance.
+	We propose a basic model to integrate evidence for entailment,
+	show that joint training of the sentence embeddings to model
+	relevance and entailment is feasible and that our proposed model
 	is powerful enough to correctly answer most questions even when
-	given a relatively small dataset, even in the context of
-	strong non-neural IR baselines.
+	given a relatively small dataset and no explicit per-evidence supervision.
+	% even in the context of strong non-neural IR baselines.
+
+	Our research is motivated primarily by a new open dataset we introduce,
+	consisting of binary questions and news-based evidence snippets.
+	We also apply the proposed relevance-entailment model on a similar task
+	of ranking multiple-choice test answers, evaluating it on the standard
+	MCTest dataset and another preliminary dataset of school test questions.
 \end{abstract}
 
 \section{Introduction}
@@ -126,8 +132,14 @@ that (A) learns sentence embeddings for the question and evidence,
 as linear classifier inputs, and (C) the model aggregates all available evidence
 to produce a binary signal as the answer, which is the only training supervision.
 
+A related task concerns ranking answers of multiple-choice questions given
+a set of evidencing sentences.  We evaluate our model on this task as well,
+considering the MCTest dataset and the AI2-8grade/CK12 dataset that we introduce
+below.
+
 The paper is structured as follows.  In Sec.~\ref{sec:argus}, we formally outline
-the Argus question answering task and describe the question-evidence dataset.
+the Argus question answering task, describe the question-evidence dataset,
+and describe the multiple-choice questions task and datasets.
 In Sec.~\ref{sec:relwork}, we briefly survey the related work on similar problems,
 whereas in Sec.~\ref{sec:clasrel} we present our ClasRel neural model for joint
 learning of sentence relevance and entailment.  We present the results in Sec.~\ref{sec:res}
