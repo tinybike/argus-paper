@@ -315,10 +315,69 @@ sentences.
 \section{ClasRel Neural Model}
 \label{sec:clasrel}
 
+Our approach is to use a sequence of word embeddings to build
+sentence embeddings for each hypothesis and respective evidence,
+then use the sentence embeddings to estimate relevance and
+entailment of each evidence with regard to the respective
+hypothesis, and integrate the evidence by weighing the entailment
+by relevance.
+
+\subsection{Sentence Embeddings}
+
+To produce sentence embeddings, we investigated the usage
+of neural models of the \texttt{dataset-sts} framework
+for deep learning of sentence pair scoring functions. \cite{sps}
+
+We refer the reader to \cite{sps} and its references for detailed
+model descriptions.  We evaluate an RNN model which uses bidirectionally
+summed GRU memory cells and uses the final states as embeddings;
+a CNN model which uses sentence-max-pooled filters as embeddings;
+a RNN-CNN model which puts the CNN on top of per-token GRU outputs
+rather than the word embeddings; and an \textit{attn1511} model
+inspired by \cite{attn1511} that integrates the RNN-CNN model
+with per-word softmax attention to focus evidence embeddings based
+on the hypothesis.
+
+As model input, we use the standard GloVe embeddings \cite{GloVe}.
+Relative to \cite{sps}, we introduce two differences to the word
+embedding --- we use 50-dimensional embeddings instead of 300-dimensional
+and rather than building an adaptable embedding matrix only from the
+training set words preinitialized by GloVe, we use only the top 100
+most frequent tokens in the adaptable embedding matrix and use
+fixed GloVe vectors for all other tokens (including tokens not
+found in the training set).  This should improve behavior for highly
+vocabulary-rich tasks like Argus, while still allowing the high-frequency
+tokens (like interpunction or conjunctions) to learn semantic operator representations.
+
+\subsection{Evidence Integration}
+
+From each pair of hypothesis and evidence embeddings, we produce two $[0,1]$
+predictions using a pair of MLP point-scorers of \texttt{dataset-sts} \cite{sps}%
+\footnote{From the elementwise product
+and sum of the embeddings, a linear classifier directly produces a prediction;
+contrary to typical setup, we use no hidden layer.}
+with sigmoid activation function.  The predictions are interpreted as $C_i \in [0,1]$
+entailment (0 to 1 as \textit{no} to \textit{yes}) and relevance $R_i \in [0,1]$.
+
+To integrate the predictions across multiple pieces of evidence,
+we propose a weighed average model:\\
+
+\[ y  = \dfrac{\sum_i C_iR_i}{\sum_i R_i}
+\]
+
+We do not have access to any explicit labels for the evidence,
+but we train the model end-to-end with just $y$ labels and the formula
+for $y$ is differentiable, carrying over the gradient to the sentence
+embedding model.
+
 \section{Results}
 \label{sec:res}
 
 \subsection{Experimental Setup}
+
+We train the whole model from word embeddings to output evidence-integrated
+hypothesis label using the binary cross-entropy loss as an objective
+and the Adam optimization algorithm.
 
 \subsection{Evaluation}
 
@@ -355,6 +414,10 @@ TODO
 
 \section{Conclusion}
 \label{sec:concl}
+
+We release our implementation of the Argus task, evidence integration
+model and dataset processing as open source.%
+\footnote{\url{https://github.com/brmson/dataset-sts} task \textit{hypev}}
 
 
 \section*{Acknowledgments}
