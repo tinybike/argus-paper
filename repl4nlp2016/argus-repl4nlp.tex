@@ -158,7 +158,7 @@ whereas other users bet on the \textit{yes} or \textit{no} answer,
 with the assumption that the bet price reflects the real probability
 of the event.  At a specified moment (e.g.\ after the date of a to-be-predicted sports match), the
 correct answer is retroactively determined and the bets are paid off.
-At a larger volume of questions, the bet pay-off determination may
+At a larger volume of questions, determining the bet results may
 present a significant overhead for running of the market.
 This motivates the Argus system, which should partially automate
 this determination --- deciding questions related to recent events
@@ -174,18 +174,6 @@ TODO: example
 
 
 \subsection{Dataset}
-
-This is supposed
-to be an alternative to the manual answering process done by humans,
-or an augmentation that pre-suggests answers and provides gathered
-evidence for a final human decision, allowing the process to scale
-up greatly.  Another important \textsc{Augur} module tightly
-coupled to Argus is \textbf{Syphon} which provides an interactive
-user interface when asking a question, including auto-completion,
-auto-validation and possibly a template system, with the aim to
-ensure clarity and unambiguity of questions and permit reliable
-Argus operation.
-
 
 To help develop a machine learning model for the $f_h$ function,
 we have created a dataset of questions with gold labels, and used
