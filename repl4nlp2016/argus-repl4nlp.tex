@@ -303,11 +303,11 @@ They also proposed baseline recurrent neural model for modeling
 sentence representations, while word-level attention based models
 are studied more recently \cite{SNLIattn} \cite{LSTMMR}.
 
-TODO SICK-2014
+%TODO SICK-2014
 
 In the MCTest text comprehension challenge \cite{MCTest}, the
 best models use complex feature engineering ensembling multiple traditional
-semantic NLP approaches, while the best deep model so far
+semantic NLP approaches \cite{MCWang}, while the best deep model so far
 of \cite{HABCNN} uses convolutional neural networks to build sentence
 representations, and attention on multiple levels to select evidencing
 sentences.
@@ -336,7 +336,11 @@ a \textbf{RNN-CNN} model which puts the CNN on top of per-token GRU outputs
 rather than the word embeddings; and an \textbf{attn1511} model
 inspired by \cite{attn1511} that integrates the RNN-CNN model
 with per-word softmax attention to focus evidence embeddings based
-on the hypothesis.
+on the hypothesis.  We also report the baseline results of
+\textbf{avg} mean of word embeddings in the sentence
+and \textbf{DAN} Deep Averaging Network model.
+
+TODO attn1511 customizations
 
 As model input, we use the standard GloVe embeddings \cite{GloVe}.
 Relative to \cite{sps}, we introduce two differences to the word
@@ -376,7 +380,8 @@ embedding model.
 
 We train the whole model from word embeddings to output evidence-integrated
 hypothesis label using the binary cross-entropy loss as an objective
-and the Adam optimization algorithm.
+and the Adam optimization algorithm.  We apply $\mathbb{L}_2 = 10^-4$
+regularization, but no dropout (except the DAN model).
 
 \subsection{Evaluation}
 
@@ -409,14 +414,30 @@ Test: 0.674842 ±0.012944
 relevance by BM25:
 TODO
 
-\subsection{Embeddings Analysis}
+transfer learning from Ubuntu:
+TODO
+
+TODO error analysis (mainly team X beats Y vs.\ team Y beats X)
 
 \section{Conclusion}
 \label{sec:concl}
 
+We have shown that TODO
+
 We release our implementation of the Argus task, evidence integration
 model and dataset processing as open source.%
 \footnote{\url{https://github.com/brmson/dataset-sts} task \textit{hypev}}
+
+We believe the next step towards machine comprehension NLP models
+that are based on deep learning but capable of dealing with real-world,
+large-vocabulary data will involve research into a better way to deal with
+entities without available embeddings, as shown in the error analysis.
+A promising approach could address
+the flexibility of the final representation, moving from attention mechanism
+to a memory mechanism\footnote{Not necessarily ``memories'' in the sense of Memory Networks.}
+by allowing the network to remember a set of ``facts'' derived from each sentence;
+related work has been done on end-to-end differentiable shift-reduce parsers
+with LSTM as stack cells \cite{EndToEndParsing}.
 
 
 \section*{Acknowledgments}
