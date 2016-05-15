@@ -173,7 +173,7 @@ and $H_i = (q_i, M_i)$ is a hypothesis in the form of question text $q_i$
 and a set of $E_i = \{e_{ij}\}$ evidence texts $e_{ij}$ as extracted
 from an evidence-carrying corpus.
 
-TODO: example
+% TODO: example
 
 
 \subsection{Argus Dataset}
@@ -445,6 +445,8 @@ Model              & train & val & test \\
 \hline
 avg & $0.872$ & $0.816$ & $0.744$\\
  & $\quad^{\pm0.009}$ & $\quad^{\pm0.008}$ & $\quad^{\pm0.020}$\\
+DAN & $0.884$ & $0.822$ & $0.754$\\
+ & $\quad^{\pm0.012}$ & $\quad^{\pm0.011}$ & $\quad^{\pm0.025}$\\
 \hline
 RNN & $0.906$ & $0.875$ & $0.823$\\
  & $\quad^{\pm0.013}$ & $\quad^{\pm0.005}$ & $\quad^{\pm0.008}$\\
@@ -478,10 +480,10 @@ avg & $0.746$ & $0.770$ & $0.744$\\
 \hline
 RNN & $0.822$ & $0.828$ & $0.823$\\
  & $\quad^{\pm0.015}$ & $\quad^{\pm0.015}$ & $\quad^{\pm0.008}$\\
-CNN & $0.817$ &  & $0.822$\\
- & $\quad^{\pm0.016}$ &  & $\quad^{\pm0.007}$\\
-RNN-CNN & $0.817$ &  & $0.816$\\
- & $\quad^{\pm0.011}$ &  & $\quad^{\pm0.009}$\\
+%CNN & $0.817$ &  & $0.822$\\
+% & $\quad^{\pm0.016}$ &  & $\quad^{\pm0.007}$\\
+%RNN-CNN & $0.817$ &  & $0.816$\\
+% & $\quad^{\pm0.011}$ &  & $\quad^{\pm0.009}$\\
 attn1511 & $0.819$ & $0.811$ & $0.816$\\
  & $\quad^{\pm0.013}$ & $\quad^{\pm0.012}$ & $\quad^{\pm0.008}$\\
 Ubu.\ RNN & $0.847$ & $0.831$ & $0.852$\\
@@ -503,10 +505,130 @@ approaches in Fig.~\ref{tab:argusev} shows that contrary to our expectations,
 evidence integration is not the major deciding factor and there are no
 staticially meaningful differences between the evaluated approaches.
 
+\begin{figure}[t]
+\centering
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Model              & train & val & test \\
+\hline
+avg & $0.505$ & $0.442$ & $0.401$\\
+ & $\quad^{\pm0.024}$ & $\quad^{\pm0.022}$ & $\quad^{\pm0.016}$\\
+DAN & $0.556$ & $0.491$ & $0.391$\\
+ & $\quad^{\pm0.038}$ & $\quad^{\pm0.015}$ & $\quad^{\pm0.008}$\\
+\hline
+RNN & $0.712$ & $0.381$ & $0.361$\\
+ & $\quad^{\pm0.053}$ & $\quad^{\pm0.016}$ & $\quad^{\pm0.012}$\\
+CNN & $0.676$ & $0.442$ & $0.384$\\
+ & $\quad^{\pm0.056}$ & $\quad^{\pm0.012}$ & $\quad^{\pm0.011}$\\
+RNN-CNN & $0.582$ & $0.439$ & $0.376$\\
+ & $\quad^{\pm0.057}$ & $\quad^{\pm0.024}$ & $\quad^{\pm0.014}$\\
+attn1511 & $0.725$ & $0.384$ & $0.358$\\
+ & $\quad^{\pm0.069}$ & $\quad^{\pm0.012}$ & $\quad^{\pm0.015}$\\
+Ubu.\ RNN & $0.570$ & $0.494$ & \textbf{0.441}\\
+ & $\quad^{\pm0.059}$ & $\quad^{\pm0.012}$ & $\quad^{\pm0.011}$\\
+\hline
+\end{tabular}
+\setlength{\tabcolsep}{6pt}
+\vspace*{-0.2cm}
+\caption{\footnotesize%
+	Model (question-level) accuracy on the AI2-8grade/CK12 task, using the evidence weighing scheme.
+}
+\label{tab:ai2}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Model              & Mean Ev. & BM25 Feat. & Weighed \\
+\hline
+avg & $0.366$ & \textbf{0.415} & \textbf{0.401}\\
+ & $\quad^{\pm0.010}$ & $\quad^{\pm0.008}$ & $\quad^{\pm0.016}$\\
+\hline
+%RNN & $0.349$ &  & $0.361$\\
+% & $\quad^{\pm0.015}$ &  & $\quad^{\pm0.012}$\\
+CNN & $0.385$ &  & $0.384$\\
+ & $\quad^{\pm0.020}$ &  & $\quad^{\pm0.011}$\\
+%RNN-CNN & $0.372$ &  & $0.376$\\
+% & $\quad^{\pm0.023}$ &  & $\quad^{\pm0.014}$\\
+%attn1511 & $0.351$ &  & $0.358$\\
+% & $\quad^{\pm0.010}$ &  & $\quad^{\pm0.015}$\\
+Ubu.\ RNN & $0.416$ & $0.418$ & \textbf{0.441}\\
+ & $\quad^{\pm0.011}$ & $\quad^{\pm0.009}$ & $\quad^{\pm0.011}$\\
+\hline
+\end{tabular}
+\setlength{\tabcolsep}{6pt}
+\vspace*{-0.2cm}
+\caption{\footnotesize%
+	Comparing the influence of the evidence integration schemes on the AI2-8grade/CK12 test accuracy.
+}
+\label{tab:ai2ev}
+\end{figure}
+
+In Fig.~\ref{tab:ai2}, we look at the model performance on the AI2-8grade/CK12 task,
+repeating the story of Ubuntu Dialogue transfer RNN dominating other models.
+However, on this task our proposed evidence weighing scheme improves over
+simpler approaches --- but just on the best model, as shown in Fig.~\ref{tab:ai2ev}.
+On the other hand, the simplest averaging model benefits from at least BM25
+information to select relevant evidence, apparently.
+
+\begin{figure}[t]
+\centering
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Model              & MC-160 all & MC-500 all \\
+\hline
+Attn. Reader & $0.463$ & $0.419$\\
+Neur. Reader & $0.476$ & $0.456$\\
+\cite{HABCNN} & $0.631$ & $0.529$\\
+\hline
+avg & $0.442$ & $0.480$\\
+ & $\quad^{\pm0.026}$ & $\quad^{\pm0.011}$\\
+DAN & $0.431$ & $0.507$\\
+ & $\quad^{\pm0.020}$ & $\quad^{\pm0.010}$\\
+\hline
+RNN & $0.449$ & $0.424$\\
+ & $\quad^{\pm0.042}$ & $\quad^{\pm0.017}$\\
+CNN & $0.486$ & $0.440$\\
+ & $\quad^{\pm0.028}$ & $\quad^{\pm0.014}$\\
+RNN-CNN & $0.421$ & $0.453$\\
+ & $\quad^{\pm0.033}$ & $\quad^{\pm0.017}$\\
+attn1511 & $0.436$ & $0.454$\\
+ & $\quad^{\pm0.031}$ & $\quad^{\pm0.028}$\\
+Ubu.\ RNN & $0.541$ & $0.511$\\
+ & $\quad^{\pm0.033}$ & $\quad^{\pm0.022}$\\
+\hline
+$^*$ Ubu.\ RNN & $0.617$ & $0.560$\\
+ & $\quad^{\pm0.033}$ & $\quad^{\pm0.022}$\\
+\hline
+\end{tabular}
+\setlength{\tabcolsep}{6pt}
+\vspace*{-0.2cm}
+\caption{\footnotesize%
+	Model (question-level) accuracy on the MCTest task, using the evidence weighing scheme. \\
+	$^*$ The top test set result across 16 runs, demonstrating the importance
+	of reporting neural evaluation results statistically.
+}
+\label{tab:mctest}
+\end{figure}
+
+In Fig.~\ref{tab:mctest}, we compare our proposed models with past neural models
+from the literature, seeing that on the harder task, our model equals the best
+so far reported \cite{HABCNN} model of HABCNN-TE.\@  The previous work did not include
+confidence intervals, even though their model should also be stochastically initialized,
+so we cannot precisely judge their stastical relation but assume the models
+to be equivalent.
+
+
 
 % TODO error analysis (mainly team X beats Y vs.\ team Y beats X)
 
 % TODO top outlier for MCtest
+
+% TODO compare rnn,cnn,attn1511
 
 \section{Conclusion}
 \label{sec:concl}
