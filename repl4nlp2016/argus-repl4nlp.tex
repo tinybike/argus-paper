@@ -73,14 +73,14 @@
 	pieces of evidence to determine a yes/no answer to a binary
 	natural language question.
 
-	We compare several neural network variants for sentence embeddings
+	We compare several variants of neural networks for sentence embeddings
 	in a setting of decision-making based on evidence of varying relevance.
 	We propose a basic model to integrate evidence for entailment,
 	show that joint training of the sentence embeddings to model
-	relevance and entailment is feasible and that our proposed model
-	is powerful enough to correctly answer most questions even when
-	given a relatively small dataset and no explicit per-evidence supervision.
-	% even in the context of strong non-neural IR baselines.
+	relevance and entailment is feasible even with no explicit per-evidence
+	supervision, and show the importance of evaluating strong baselines.
+	We also demonstrate the benefit of carrying over text comprehension model
+	trained on an unrelated task for our small datasets.
 
 	Our research is motivated primarily by a new open dataset we introduce,
 	consisting of binary questions and news-based evidence snippets.
@@ -95,8 +95,8 @@ Let us consider the goal of building machine reasoning systems based
 on knowledge from fulltext data like encyclopedic articles, scientific
 papers or news articles.
 Such machine reasoning systems, like humans researching a problem,
-must be able to retrieve evidence from large amounts of retrieved
-but irrelevant information and judge what answer the evidence entails
+must be able to recover evidence from large amounts of retrieved
+but likely irrelevant information and judge what answer the evidence entails
 to the question at hand.
 
 A typical approach, used implicitly in information retrieval
@@ -115,8 +115,10 @@ The problem is, given a real-world event binary question like
 \textit{Did Donald Trump announce he is running for president?}
 and numerous retrieved news article fragments as evidence,
 to determine the answer for the question.
+We further generalize this problem and propose a \textbf{Hypothesis Evaluation}
+where the questions and evidence can vary in form, size and vocabulary.
 
-This problem is motivated by the Argus automatic reporting system for
+Our research is motivated by the Argus automatic reporting system for
 the Augur prediction market paltform. \cite{argus}  Therefore, we consider the question answering task
 within the constraints of a practical task that has limited available dataset
 and only minimum supervision.  Hence, the evidence are authentic news
@@ -141,7 +143,7 @@ The paper is structured as follows.  In Sec.~\ref{sec:argus}, we formally outlin
 the Argus question answering task, describe the question-evidence dataset,
 and describe the multiple-choice questions task and datasets.
 In Sec.~\ref{sec:relwork}, we briefly survey the related work on similar problems,
-whereas in Sec.~\ref{sec:clasrel} we present our ClasRel neural model for joint
+whereas in Sec.~\ref{sec:model} we present our neural model for joint
 learning of sentence relevance and entailment.  We present the results in Sec.~\ref{sec:res}
 and conclude with a summary and future work directions in Sec.~\ref{sec:concl}.
 
@@ -252,7 +254,9 @@ accuracy.  We always train the model on the joined version training set.
 The practical setting differs from the Argus task as the MCTest dataset contains
 relatively restricted vocabulary and well-formed sentences; furthermore,
 the goal is to find the single key point in the story to focus on, while
-in our setting we may have many pieces of evidence supporting an answer.
+in the Argus setting we may have many pieces of evidence supporting an answer.
+Finally, a specific characteristics of MCTest is that it consists of stories
+where the ordering and proximity of evidence sentences matters.
 
 
 \subsection{AI2-8grade/CK12 Dataset}
@@ -275,7 +279,9 @@ of CK-12 ``Concepts B'' textbooks.%
 We consider this dataset as preliminary, because it was not reviewed
 by a human and many hypotheses are apparently unprovable by the evidence
 we have gathered (i.e.\ the theoretical top accuracy is much lower
-than 1.0).  However, we included it in the comparison as these
+than 1.0).  However, we released it to the public%
+\footnote{\url{https://github.com/brmson/dataset-sts} directory \texttt{data/hypev/ai2-8grade}}
+and included it in the comparison as these
 qualities reflect many realistic datasets of unknown qualities, so
 we find relative performances of models on such datasets instructive.
 
@@ -315,15 +321,14 @@ of \cite{HABCNN} uses convolutional neural networks to build sentence
 representations, and attention on multiple levels to select evidencing
 sentences.
 
-\section{ClasRel Neural Model}
-\label{sec:clasrel}
+\section{Neural Model}
+\label{sec:model}
 
 Our approach is to use a sequence of word embeddings to build
 sentence embeddings for each hypothesis and respective evidence,
 then use the sentence embeddings to estimate relevance and
 entailment of each evidence with regard to the respective
-hypothesis, and integrate the evidence by weighing the entailment
-by relevance.
+hypothesis, and integrate the evidence by different strategies.
 
 \subsection{Sentence Embeddings}
 
@@ -338,12 +343,22 @@ a \textbf{CNN} model which uses sentence-max-pooled filters as embeddings;
 a \textbf{RNN-CNN} model which puts the CNN on top of per-token GRU outputs
 rather than the word embeddings; and an \textbf{attn1511} model
 inspired by \cite{attn1511} that integrates the RNN-CNN model
-with per-word softmax attention to focus evidence embeddings based
-on the hypothesis.  We also report the baseline results of
+with per-word attention to build hypothesis-specific evidence embeddings.
+We also report the baseline results of
 \textbf{avg} mean of word embeddings in the sentence
-and \textbf{DAN} Deep Averaging Network model.
+and \textbf{DAN} Deep Averaging Network model that employs word-level dropout
+and adds multiple nonlinear transformations on top of the averaged sentence
+emebddings \cite{DAN}.
 
-TODO attn1511 customizations
+The original \textbf{attn1511} model \cite{sps} (as tuned for the Answer Sentence Selection task)
+used a softmax attention mechanism that effectively selects only a few key words
+of the sentence to focus on --- for a hypothesis-evidence token $t$ scalar attention score $a_{h,e}(t)$,
+the focus $s_{h,e}(t)$ is:
+$$ s_{h,e}(t) = \exp(a_{h,e}(t)) / \sum_{t'} \exp(a_{h,e}(t')) $$
+A different focus mechanism exhibited better performance in the Hypothesis Evaluation task
+that models per-token attention more independently:
+$$ s_{h,e}(t) = \sigma(a_{h,e}(t)) / \max_{t'} \sigma(a_{h,e}(t')) $$
+We also use relu instead of tanh as the CNN transfer function.
 
 As model input, we use the standard GloVe embeddings \cite{GloVe}.
 Relative to \cite{sps}, we introduce two differences to the word
@@ -356,8 +371,16 @@ found in the training set).  This should improve behavior for highly
 vocabulary-rich tasks like Argus, while still allowing the high-frequency
 tokens (like interpunction or conjunctions) to learn semantic operator representations.
 
+As an additional method for producing sentence embeddings, we consider
+the \textbf{Ubu. RNN} transfer learning method proposed by \cite{sps} where an RNN model
+(as described above) is trained on the Ubuntu Dialogue task \cite{UbuntuLowe}
+and these weights are used to initialize an RNN model which is then fine-tuned
+on the Hypothesis Evaluation task.  We use the same model as originally proposed (except the aforementioned vocabulary handling modification),
+with the dot-product scoring used for Ubuntu Dialogue training replaced by MLP point-scores described below.
+
 \subsection{Evidence Integration}
 
+Our main proposed schema for evidence integration is \textbf{Evidence Weighing}.
 From each pair of hypothesis and evidence embeddings, we produce two $[0,1]$
 predictions using a pair of MLP point-scorers of \texttt{dataset-sts} \cite{sps}%
 \footnote{From the elementwise product
@@ -365,7 +388,6 @@ and sum of the embeddings, a linear classifier directly produces a prediction;
 contrary to typical setup, we use no hidden layer.}
 with sigmoid activation function.  The predictions are interpreted as $C_i \in [0,1]$
 entailment (0 to 1 as \textit{no} to \textit{yes}) and relevance $R_i \in [0,1]$.
-
 To integrate the predictions across multiple pieces of evidence,
 we propose a weighed average model:
 
@@ -376,6 +398,11 @@ but we train the model end-to-end with just $y$ labels and the formula
 for $y$ is differentiable, carrying over the gradient to the sentence
 embedding model.
 
+As a baseline strategy, we also consider \textbf{Evidence Averaging}, where
+we simply produce a single scalar prediction per hypothesis-evidence pair
+(using the same strategy as above) and decide the hypothesis simply based
+on the mean prediction across available evidence.
+
 \section{Results}
 \label{sec:res}
 
@@ -384,7 +411,7 @@ embedding model.
 We train the whole model from word embeddings to output evidence-integrated
 hypothesis label using the binary cross-entropy loss as an objective
 and the Adam optimization algorithm.  We apply $\mathbb{L}_2 = 10^-4$
-regularization, but no dropout (except the DAN model).
+regularization and a $p=1/3$ dropout.
 
 \subsection{Evaluation}
 
@@ -425,7 +452,18 @@ TODO error analysis (mainly team X beats Y vs.\ team Y beats X)
 \section{Conclusion}
 \label{sec:concl}
 
-We have shown that TODO
+We have established the Hypothesis Evaluation task with three datasets
+of various properties, and shown that neural models can exhibit strong
+performance (with less hand-crafting effort than non-neural classifiers).
+We also demonstrate that simple models can outperform or closely match
+performance of complicated architectures, and we would like to encourage
+usage of basic neural architectures as evaluation baselines.  Finally,
+our results empirically show that a basic RNN text comprehension model
+well tuned on a large dataset (even if the task is unrelated and vocabulary
+characteristics are very different) outperforms more complex architectures
+trained only on the dataset of the task at hand, and we would like to
+suggest that future research includes models pretrained on large data as
+baselines as well.
 
 We release our implementation of the Argus task, evidence integration
 model and dataset processing as open source.%
@@ -435,6 +473,7 @@ We believe the next step towards machine comprehension NLP models
 that are based on deep learning but capable of dealing with real-world,
 large-vocabulary data will involve research into a better way to deal with
 entities without available embeddings, as shown in the error analysis.
+In the realm of embeddings, simple word-level attention mechanisms will not do.
 A promising approach could address
 the flexibility of the final representation, moving from attention mechanism
 to a memory mechanism\footnote{Not necessarily ``memories'' in the sense of Memory Networks.}
