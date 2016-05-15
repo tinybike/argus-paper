@@ -409,9 +409,20 @@ on the mean prediction across available evidence.
 \subsection{Experimental Setup}
 
 We train the whole model from word embeddings to output evidence-integrated
-hypothesis label using the binary cross-entropy loss as an objective
+hypothesis label using the binary cross-entropy loss as an objective%
+\footnote{Unlike \cite{HABCNN}, we have found ranking-based loss functions
+	ineffective for this task.}
 and the Adam optimization algorithm.  We apply $\mathbb{L}_2 = 10^-4$
 regularization and a $p=1/3$ dropout.
+
+Following the recommendation of \cite{sps}, we report expected test set
+question accuracy%
+\footnote{In the MCTest and AI2-8grade/CK12 datasets, we test and rank four
+	hypotheses per question, whereas in the Argus dataset, each
+	hypothesis is a single question.}
+as determined by average accuracy in 16-way independent training runs
+and with confidence intervals based on the Student's
+t-distribution.
 
 \subsection{Evaluation}
 
@@ -449,6 +460,8 @@ TODO
 
 TODO error analysis (mainly team X beats Y vs.\ team Y beats X)
 
+TODO top outlier for MCtest
+
 \section{Conclusion}
 \label{sec:concl}
 
@@ -456,17 +469,27 @@ We have established the Hypothesis Evaluation task with three datasets
 of various properties, and shown that neural models can exhibit strong
 performance (with less hand-crafting effort than non-neural classifiers).
 We also demonstrate that simple models can outperform or closely match
-performance of complicated architectures, and we would like to encourage
-usage of basic neural architectures as evaluation baselines.  Finally,
-our results empirically show that a basic RNN text comprehension model
+performance of complicated architectures.
+Our results empirically show that a basic RNN text comprehension model
 well tuned on a large dataset (even if the task is unrelated and vocabulary
 characteristics are very different) outperforms more complex architectures
-trained only on the dataset of the task at hand, and we would like to
-suggest that future research includes models pretrained on large data as
-baselines as well.
+trained only on the dataset of the task at hand.
+
+Finally, on the MCTest dataset, our best proposed model is statistically
+indistinguishable from the best neural network model reported so far
+\cite{HABCNN},
+even though it has much simpler architecture and no attention mechanism.
+
+We would like to draw three recommendations from our findings:
+(A) encourage usage of basic neural architectures as evaluation baselines;
+(B) suggest that future research includes models pretrained on large data as
+baselines; and
+(C) for randomized models (e.g.\ neural networks with random weight
+initialization and batch shuffling), report expected test set performance
+based on multiple independent training runs.
 
 We release our implementation of the Argus task, evidence integration
-model and dataset processing as open source.%
+models and processing of all the reported datasets as open source.%
 \footnote{\url{https://github.com/brmson/dataset-sts} task \textit{hypev}}
 
 We believe the next step towards machine comprehension NLP models
