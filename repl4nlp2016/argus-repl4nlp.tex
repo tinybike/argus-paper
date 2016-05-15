@@ -436,7 +436,7 @@ question accuracy%
 	hypotheses per question, whereas in the Argus dataset, each
 	hypothesis is a single question.}
 as determined by average accuracy in 16-way independent training runs
-and with confidence intervals based on the Student's
+and with 95\% confidence intervals based on the Student's
 t-distribution.
 
 \subsection{Evaluation}
@@ -579,35 +579,35 @@ simpler approaches --- but just on the best model, as shown in Fig.~\ref{tab:ai2
 On the other hand, the simplest averaging model benefits from at least BM25
 information to select relevant evidence, apparently.
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{|c|c|c|c|}
+\begin{tabular}{|c|ccc|ccc|}
 \hline
-Model              & MC-160 all & MC-500 all \\
+                   & MC-160     &             &            & MC-500     &      & \\
+Model              & one & many & all & one & many & all \\
 \hline
-Attn. Reader & $0.463$ & $0.419$\\
-Neur. Reader & $0.476$ & $0.456$\\
-\cite{HABCNN} & $0.631$ & $0.529$\\
+Attn. Reader & $0.481$ & $0.447$ & $0.463$ & $0.444$ & $0.395$ & $0.419$\\
+Neur. Reasoner & $0.484$ & $0.468$ & $0.476$ & $0.457$ & $0.456$ & $0.456$\\
+HABCNN-TE & $0.633$ & $0.629$ & \textbf{0.631} & $0.542$ & $0.517$ & \textbf{0.529}\\
 \hline
-avg & $0.442$ & $0.480$\\
- & $\quad^{\pm0.026}$ & $\quad^{\pm0.011}$\\
-DAN & $0.431$ & $0.507$\\
- & $\quad^{\pm0.020}$ & $\quad^{\pm0.010}$\\
+avg & $0.526$ & $0.395$ & $0.442$ & $0.439$ & $0.410$ & $0.480$\\
+ & $\quad^{\pm0.016}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.026}$ & $\quad^{\pm0.017}$ & $\quad^{\pm0.013}$ & $\quad^{\pm0.011}$\\
+DAN & $0.543$ & $0.342$ & $0.431$ & $0.474$ & $0.418$ & $0.507$\\
+ & $\quad^{\pm0.017}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.020}$ & $\quad^{\pm0.014}$ & $\quad^{\pm0.010}$ & $\quad^{\pm0.010}$\\
 \hline
-RNN & $0.449$ & $0.424$\\
- & $\quad^{\pm0.042}$ & $\quad^{\pm0.017}$\\
-CNN & $0.486$ & $0.440$\\
- & $\quad^{\pm0.028}$ & $\quad^{\pm0.014}$\\
-RNN-CNN & $0.421$ & $0.453$\\
- & $\quad^{\pm0.033}$ & $\quad^{\pm0.017}$\\
-attn1511 & $0.436$ & $0.454$\\
- & $\quad^{\pm0.031}$ & $\quad^{\pm0.028}$\\
-Ubu.\ RNN & $0.541$ & $0.511$\\
- & $\quad^{\pm0.033}$ & $\quad^{\pm0.022}$\\
+RNN & $0.477$ & $0.395$ & $0.449$ & $0.397$ & $0.349$ & $0.424$\\
+ & $\quad^{\pm0.039}$ & $\quad^{\pm0.028}$ & $\quad^{\pm0.042}$ & $\quad^{\pm0.021}$ & $\quad^{\pm0.017}$ & $\quad^{\pm0.017}$\\
+CNN & $0.539$ & $0.431$ & $0.486$ & $0.425$ & $0.373$ & $0.440$\\
+ & $\quad^{\pm0.023}$ & $\quad^{\pm0.023}$ & $\quad^{\pm0.028}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.013}$ & $\quad^{\pm0.014}$\\
+RNN-CNN & $0.513$ & $0.371$ & $0.421$ & $0.423$ & $0.378$ & $0.453$\\
+ & $\quad^{\pm0.029}$ & $\quad^{\pm0.026}$ & $\quad^{\pm0.033}$ & $\quad^{\pm0.026}$ & $\quad^{\pm0.019}$ & $\quad^{\pm0.017}$\\
+attn1511 & $0.471$ & $0.402$ & $0.436$ & $0.400$ & $0.383$ & $0.454$\\
+ & $\quad^{\pm0.045}$ & $\quad^{\pm0.032}$ & $\quad^{\pm0.031}$ & $\quad^{\pm0.034}$ & $\quad^{\pm0.016}$ & $\quad^{\pm0.028}$\\
+Ubu.\ RNN & $0.572$ & $0.410$ & $0.541$ & $0.517$ & $0.383$ & \textbf{0.511}\\
+ & $\quad^{\pm0.025}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.033}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.015}$ & $\quad^{\pm0.022}$\\
 \hline
-$^*$ Ubu.\ RNN & $0.617$ & $0.560$\\
- & $\quad^{\pm0.033}$ & $\quad^{\pm0.022}$\\
+$^*$ Ubu.\ RNN & $0.621$ & $0.417$ & $0.617$ & $0.571$ & $0.412$ & $0.560$\\
 \hline
 \end{tabular}
 \setlength{\tabcolsep}{6pt}
@@ -618,6 +618,30 @@ $^*$ Ubu.\ RNN & $0.617$ & $0.560$\\
 	of reporting neural evaluation results statistically.
 }
 \label{tab:mctest}
+\end{figure*}
+
+\begin{figure}[t]
+\centering
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Model              & Mean Ev. & BM25 Feat. & Weighed \\
+\hline
+avg & $0.334$ & $0.409$ & \textbf{0.480}\\
+ & $\quad^{\pm0.012}$ & $\quad^{\pm0.026}$ & $\quad^{\pm0.011}$\\
+\hline
+CNN & $0.264$ &  & \textbf{0.440}\\
+ & $\quad^{\pm0.030}$ &  & $\quad^{\pm0.014}$\\
+Ubu.\ RNN & $0.437$ & $0.418$ & \textbf{0.511}\\
+ & $\quad^{\pm0.041}$ & $\quad^{\pm0.025}$ & $\quad^{\pm0.022}$\\
+\hline
+\end{tabular}
+\setlength{\tabcolsep}{6pt}
+\vspace*{-0.2cm}
+\caption{\footnotesize%
+	Comparing the influence of the evidence integration schemes on the MC-500 test accuracy.
+}
+\label{tab:mctestev}
 \end{figure}
 
 In Fig.~\ref{tab:mctest}, we compare our proposed models with past neural models
@@ -628,13 +652,16 @@ We see that on the harder task, our model equals the best
 so far reported model of HABCNN-TE.\@  The previous work did not include
 confidence intervals, even though their model should also be stochastically initialized,
 so we cannot precisely judge their stastical relation but assume the models
-to be equivalent.
+to be equivalent on the MC-500 dataset.
 
+Interestingly, on the MCTest task, evidence weighing plays an important role
+as shown in Fig.~\ref{tab:mctestev},
+significantly boosting the accuracy of all models.
+This confirms that a way to allocate attention to different sentences
+is indeed crucial for this task.
 
 
 % TODO error analysis (mainly team X beats Y vs.\ team Y beats X)
-
-% TODO top outlier for MCtest
 
 % TODO compare rnn,cnn,attn1511
 
@@ -658,7 +685,8 @@ of the HABCNN models that were trained to also predict question classes.}
 Finally, on the MCTest dataset, our best proposed model is statistically
 indistinguishable from the best neural network model reported so far
 \cite{HABCNN},
-even though it has much simpler architecture and no attention mechanism.
+even though it has much simpler architecture and only a simple attention
+mechanism.
 
 We would like to draw three recommendations from our findings:
 (A) encourage usage of basic neural architectures as evaluation baselines;
