@@ -372,7 +372,7 @@ vocabulary-rich tasks like Argus, while still allowing the high-frequency
 tokens (like interpunction or conjunctions) to learn semantic operator representations.
 
 As an additional method for producing sentence embeddings, we consider
-the \textbf{Ubu. RNN} transfer learning method proposed by \cite{sps} where an RNN model
+the \textbf{Ubu.\ RNN} transfer learning method proposed by \cite{sps} where an RNN model
 (as described above) is trained on the Ubuntu Dialogue task \cite{UbuntuLowe}
 and these weights are used to initialize an RNN model which is then fine-tuned
 on the Hypothesis Evaluation task.  We use the same model as originally proposed (except the aforementioned vocabulary handling modification),
@@ -403,6 +403,12 @@ we simply produce a single scalar prediction per hypothesis-evidence pair
 (using the same strategy as above) and decide the hypothesis simply based
 on the mean prediction across available evidence.
 
+Finally, following success reported in the Answer Sentence Selection task \cite{sps},
+we consider a \textbf{BM25 Feature} combined with Evidence Averaging,
+where the MLP scorer producing the pair scalar prediction as above has
+an additional BM25 word overlap score input \cite{BM25} besides the elementwise
+embedding comparisons.
+
 \section{Results}
 \label{sec:res}
 
@@ -426,41 +432,77 @@ t-distribution.
 
 \subsection{Evaluation}
 
-Rnn features only:
-Train: 0.936168 ±0.014544
-Val: 0.883608 ±0.008952
-Test: 0.829114 ±0.011312
+\begin{figure}[t]
+\centering
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Model              & train & val & test \\
+\hline
+avg & $0.872$ & $0.816$ & $0.744$\\
+ & $\quad^{\pm0.009}$ & $\quad^{\pm0.008}$ & $\quad^{\pm0.020}$\\
+\hline
+RNN & $0.906$ & $0.875$ & $0.823$\\
+ & $\quad^{\pm0.013}$ & $\quad^{\pm0.005}$ & $\quad^{\pm0.008}$\\
+CNN & $0.896$ & $0.857$ & $0.822$\\
+ & $\quad^{\pm0.018}$ & $\quad^{\pm0.006}$ & $\quad^{\pm0.007}$\\
+RNN-CNN & $0.885$ & $0.860$ & $0.816$\\
+ & $\quad^{\pm0.010}$ & $\quad^{\pm0.007}$ & $\quad^{\pm0.009}$\\
+attn1511 & $0.935$ & $0.877$ & $0.816$\\
+ & $\quad^{\pm0.021}$ & $\quad^{\pm0.008}$ & $\quad^{\pm0.008}$\\
+Ubu.\ RNN & $0.951$ & $0.912$ & \textbf{0.852}\\
+ & $\quad^{\pm0.017}$ & $\quad^{\pm0.004}$ & $\quad^{\pm0.008}$\\
+\hline
+\end{tabular}
+\setlength{\tabcolsep}{6pt}
+\vspace*{-0.2cm}
+\caption{\footnotesize%
+	Model accuracy on the Argus task, using the evidence weighing scheme.
+}
+\label{tab:argus}
+\end{figure}
 
-Avg features only:
-Train: 0.917400 ±0.003061
-Val: 0.768713 ±0.009674
-Test: 0.678006 ±0.009330
+\begin{figure}[t]
+\centering
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Model              & Mean Ev. & BM25 Feat. & Weighed \\
+\hline
+avg & $0.746$ & $0.770$ & $0.744$\\
+ & $\quad^{\pm0.051}$ & $\quad^{\pm0.011}$ & $\quad^{\pm0.020}$\\
+\hline
+RNN & $0.822$ & $0.828$ & $0.823$\\
+ & $\quad^{\pm0.015}$ & $\quad^{\pm0.015}$ & $\quad^{\pm0.008}$\\
+CNN & $0.817$ &  & $0.822$\\
+ & $\quad^{\pm0.016}$ &  & $\quad^{\pm0.007}$\\
+RNN-CNN & $0.817$ &  & $0.816$\\
+ & $\quad^{\pm0.011}$ &  & $\quad^{\pm0.009}$\\
+attn1511 & $0.819$ & $0.811$ & $0.816$\\
+ & $\quad^{\pm0.013}$ & $\quad^{\pm0.012}$ & $\quad^{\pm0.008}$\\
+Ubu.\ RNN & $0.847$ & $0.831$ & $0.852$\\
+ & $\quad^{\pm0.009}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.008}$\\
+\hline
+\end{tabular}
+\setlength{\tabcolsep}{6pt}
+\vspace*{-0.2cm}
+\caption{\footnotesize%
+	Comparing the influence of the evidence integration schemes on the Argus test accuracy.
+}
+\label{tab:argusev}
+\end{figure}
 
-cnn features only:
-Train: 0.959917 ±0.009605
-Val: 0.880988 ±0.014256
-Test: 0.821994 ±0.020737
+In Fig.~\ref{tab:argus}, we report the model performance on the Argus task,
+showing that the Ubuntu Dialogue transfer RNN outperforms other proposed
+models by a large margin.  However, a comparison of evidence integration
+approaches in Fig.~\ref{tab:argusev} shows that contrary to our expectations,
+evidence integration is not the major deciding factor and there are no
+staticially meaningful differences between the evaluated approaches.
 
-attn1511 features only:
-Train: 0.936399 ±0.011737
-Val: 0.899701 ±0.008580
-Test: 0.854430 ±0.009165
 
-Average end-to-end: argus tests, commit 0addc0d - 3d input, na konci mean
-classification (uniform relevance), classification by rnn:
-Train: 0.730074 ±0.008370
-Val: 0.729042 ±0.006503
-Test: 0.674842 ±0.012944
+% TODO error analysis (mainly team X beats Y vs.\ team Y beats X)
 
-relevance by BM25:
-TODO
-
-transfer learning from Ubuntu:
-TODO
-
-TODO error analysis (mainly team X beats Y vs.\ team Y beats X)
-
-TODO top outlier for MCtest
+% TODO top outlier for MCtest
 
 \section{Conclusion}
 \label{sec:concl}
