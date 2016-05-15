@@ -233,34 +233,6 @@ of the dataset is outlined in Fig.~\ref{tab:dataset}.
 \end{figure}
 
 
-\subsection{MCTest Dataset}
-
-The \textbf{Machine Comprehension Test} \cite{MCTest} dataset has been introduced
-to provide a challenge for researchers to come up with models that approach
-human-level reading comprehension, and serve as a higher-level alternative
-to semantic parsing tasks that enforce a specific knowledge representation.
-The dataset consists of a set of 660 stories spanning
-multiple sentences, written in simple and clean language (but with less restricted
-vocabulary than e.g.\ the bAbI dataset \cite{bAbI}).  Each story is accompanied
-by four questions, each with four possible answers; the questions are tagged
-as based on just a single in-story sentence, or requiring multiple sentence inference.
-We use an official extension of the dataset for RTE evaluation
-that replaces answers by full statements that combine each answer with the question.
-
-The dataset is split in two parts, MC-160 and MC-500, based on provenance but
-similar in quality.
-We report performance on both parts separately to be comparable with earlier
-work, as well as on a joined version MC-660 in order to increase evaluation
-accuracy.  We always train the model on the joined version training set.
-
-The practical setting differs from the Argus task as the MCTest dataset contains
-relatively restricted vocabulary and well-formed sentences; furthermore,
-the goal is to find the single key point in the story to focus on, while
-in the Argus setting we may have many pieces of evidence supporting an answer.
-Finally, a specific characteristics of MCTest is that it consists of stories
-where the ordering and proximity of evidence sentences matters.
-
-
 \subsection{AI2-8grade/CK12 Dataset}
 
 The \textbf{AI2 Elementary School Science Questions} (no-diagrams variant)%
@@ -287,6 +259,35 @@ than 1.0).  However, we released it to the public%
 and included it in the comparison as these
 qualities reflect many realistic datasets of unknown qualities, so
 we find relative performances of models on such datasets instructive.
+
+
+\subsection{MCTest Dataset}
+
+The \textbf{Machine Comprehension Test} \cite{MCTest} dataset has been introduced
+to provide a challenge for researchers to come up with models that approach
+human-level reading comprehension, and serve as a higher-level alternative
+to semantic parsing tasks that enforce a specific knowledge representation.
+The dataset consists of a set of 660 stories spanning
+multiple sentences, written in simple and clean language (but with less restricted
+vocabulary than e.g.\ the bAbI dataset \cite{bAbI}).  Each story is accompanied
+by four questions, each with four possible answers; the questions are tagged
+as based on just a single in-story sentence, or requiring multiple sentence inference.
+We use an official extension of the dataset for RTE evaluation
+that replaces answers by full statements that combine each answer with the question.
+
+The dataset is split in two parts, MC-160 and MC-500, based on provenance but
+similar in quality.
+%We report performance on both parts separately to be comparable with earlier
+%work, as well as on a joined version MC-660 in order to increase evaluation
+%accuracy.
+We always train the model on a joined training set.
+
+The practical setting differs from the Argus task as the MCTest dataset contains
+relatively restricted vocabulary and well-formed sentences; furthermore,
+the goal is to find the single key point in the story to focus on, while
+in the Argus setting we may have many pieces of evidence supporting an answer.
+Finally, a specific characteristics of MCTest is that it consists of stories
+where the ordering and proximity of evidence sentences matters.
 
 
 \section{Related Work}
