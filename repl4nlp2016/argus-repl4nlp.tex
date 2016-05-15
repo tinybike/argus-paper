@@ -377,8 +377,13 @@ tokens (like interpunction or conjunctions) to learn semantic operator represent
 
 As an additional method for producing sentence embeddings, we consider
 the \textbf{Ubu.\ RNN} transfer learning method proposed by \cite{sps} where an RNN model
-(as described above) is trained on the Ubuntu Dialogue task \cite{UbuntuLowe}
-and these weights are used to initialize an RNN model which is then fine-tuned
+(as described above) is trained on the Ubuntu Dialogue task \cite{UbuntuLowe}.%
+\footnote{The Ubuntu Dialogue dataset consists of one million chat dialog contexts,
+learning to rank candidates for the next utterance in the dialog;
+the sentences are based on IRC chat logs of the Ubuntu
+community technical support channels and contain casually typed interactions regarding
+computer-related problems, resembling tweet data, but longer and with heavily technical jargon.}
+The pretrained model weights are used to initialize an RNN model which is then fine-tuned
 on the Hypothesis Evaluation task.  We use the same model as originally proposed (except the aforementioned vocabulary handling modification),
 with the dot-product scoring used for Ubuntu Dialogue training replaced by MLP point-scores described below.
 
@@ -616,8 +621,11 @@ $^*$ Ubu.\ RNN & $0.617$ & $0.560$\\
 \end{figure}
 
 In Fig.~\ref{tab:mctest}, we compare our proposed models with past neural models
-from the literature, seeing that on the harder task, our model equals the best
-so far reported \cite{HABCNN} model of HABCNN-TE.\@  The previous work did not include
+from the literature, all using attention mechanisms --- the Attentive Reader of \cite{ReadComprehend},
+Neural Reasoner of \cite{NeuralReasoner} and the HABCNN model family of \cite{HABCNN}.%
+\footnote{\cite{HABCNN} also reports the results on the former models.}
+We see that on the harder task, our model equals the best
+so far reported model of HABCNN-TE.\@  The previous work did not include
 confidence intervals, even though their model should also be stochastically initialized,
 so we cannot precisely judge their stastical relation but assume the models
 to be equivalent.
@@ -637,11 +645,15 @@ We have established the Hypothesis Evaluation task with three datasets
 of various properties, and shown that neural models can exhibit strong
 performance (with less hand-crafting effort than non-neural classifiers).
 We also demonstrate that simple models can outperform or closely match
-performance of complicated architectures.
+performance of complicated architectures;
+all the models we consider are very task-independent and were successfully
+used in different contexts than Hypothesis Evaluation \cite{sps}.
 Our results empirically show that a basic RNN text comprehension model
 well tuned on a large dataset (even if the task is unrelated and vocabulary
 characteristics are very different) outperforms more complex architectures
-trained only on the dataset of the task at hand.
+trained only on the dataset of the task at hand.%
+\footnote{This beats even multi-task learning, which was employed in case
+of the HABCNN models that were trained to also predict question classes.}
 
 Finally, on the MCTest dataset, our best proposed model is statistically
 indistinguishable from the best neural network model reported so far
