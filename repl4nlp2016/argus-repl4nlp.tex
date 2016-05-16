@@ -712,9 +712,9 @@ of memory cell based RNNs.
 
 % TODO error analysis (mainly team X beats Y vs.\ team Y beats X)
 
-Regarding concrete limitations of our models, in the case of the Argus task,
-the main source of failures is dependency on a particular named entity.
-The more obvious form is \textit{Had Roger Federer beat Martin Cilic in US OPEN 2014?}
+One concrete limitations of our models in case of the Argus task
+is problem reconciling particular named entities.
+The more obvious form of this issue is \textit{Had Roger Federer beat Martin Cilic in US OPEN 2014?}
 versus an opposite \textit{Had Martin Cilic beat Roger Federer in US OPEN 2014?} ---
 another form of this problem is reconciling a hypothesis like
 \textit{Will the Royals win the World Series?}
@@ -722,7 +722,7 @@ with evidence
 \textit{Giants Win World Series With Game 7 Victory Over Royals}.
 An abstract embedding of the sentence will not carry over the required
 information --- it is important to explicitly pass and reconcile the roles
-of named entities which cannot be meaningfully embedded in a GloVe-like
+of multiple named entities which cannot be meaningfully embedded in a GloVe-like
 semantic vector space.
 
 
