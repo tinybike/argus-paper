@@ -148,10 +148,19 @@ whereas in Sec.~\ref{sec:model} we present our neural model for joint
 learning of sentence relevance and entailment.  We present the results in Sec.~\ref{sec:res}
 and conclude with a summary and future work directions in Sec.~\ref{sec:concl}.
 
-\section{The Argus Task}
+\section{The Hypothesis Evaluation Task}
 \label{sec:argus}
 
-We propose a solution to the Argus Task, where
+Formally, the Hypothesis Evaluation task is to build a function $y_i = f_h(H_i)$,
+where $y_i \in [0,1]$ is a binary label (\textit{no} towards \textit{yes})
+and $H_i = (q_i, M_i)$ is a hypothesis in the form of question text $q_i$
+and a set of $E_i = \{e_{ij}\}$ evidence texts $e_{ij}$ as extracted
+from an evidence-carrying corpus.
+
+
+\subsection{Argus Dataset}
+
+Our main aim is to propose a solution to the Argus Task, where
 the \textbf{Argus} system \cite{arguswp} \cite{argus}
 is to automatically analyze and answer questions
 in the context of the \textbf{Augur} prediction market platform.%
@@ -166,17 +175,6 @@ present a significant overhead for running of the market.
 This motivates the Argus system, which should partially automate
 this determination --- deciding questions related to recent events
 based on open news sources.
-
-Formally, the Argus task is to build a function $y_i = f_h(H_i)$,
-where $y_i \in [0,1]$ is a binary label (\textit{no} towards \textit{yes})
-and $H_i = (q_i, M_i)$ is a hypothesis in the form of question text $q_i$
-and a set of $E_i = \{e_{ij}\}$ evidence texts $e_{ij}$ as extracted
-from an evidence-carrying corpus.
-
-% TODO: example
-
-
-\subsection{Argus Dataset}
 
 To help develop a machine learning model for the $f_h$ function,
 we have created a dataset of questions with gold labels, and used
@@ -231,6 +229,8 @@ of the dataset is outlined in Fig.~\ref{tab:dataset}.
 	}
 	\label{tab:dataset}
 \end{figure}
+
+% TODO: example
 
 
 \subsection{AI2-8grade/CK12 Dataset}
