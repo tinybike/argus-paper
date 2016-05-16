@@ -86,8 +86,9 @@
 	Our research is motivated primarily by a new open dataset we introduce,
 	consisting of binary questions and news-based evidence snippets.
 	We also apply the proposed relevance-entailment model on a similar task
-	of ranking multiple-choice test answers, evaluating it on the standard
-	MCTest dataset and another preliminary dataset of school test questions.
+	of ranking multiple-choice test answers, evaluating it on
+	a preliminary dataset of school test questions as well as
+	the standard MCTest dataset, where we improve the neural model state-of-art.
 \end{abstract}
 
 \section{Introduction}
@@ -144,9 +145,9 @@ The paper is structured as follows.  In Sec.~\ref{sec:argus}, we formally outlin
 the Argus question answering task, describe the question-evidence dataset,
 and describe the multiple-choice questions task and datasets.
 In Sec.~\ref{sec:relwork}, we briefly survey the related work on similar problems,
-whereas in Sec.~\ref{sec:model} we present our neural model for joint
+whereas in Sec.~\ref{sec:model} we propose our neural models for joint
 learning of sentence relevance and entailment.  We present the results in Sec.~\ref{sec:res}
-and conclude with a summary and future work directions in Sec.~\ref{sec:concl}.
+and conclude with a summary, model usage recommendations and future work directions in Sec.~\ref{sec:concl}.
 
 \section{The Hypothesis Evaluation Task}
 \label{sec:argus}
@@ -236,10 +237,10 @@ of the dataset is outlined in Fig.~\ref{tab:dataset}.
 \subsection{AI2-8grade/CK12 Dataset}
 
 The \textbf{AI2 Elementary School Science Questions} (no-diagrams variant)%
-\footnote{http://allenai.org/data.html} released by the Allen Institute
+\footnote{\url{http://allenai.org/data.html}} released by the Allen Institute
 cover 855 basic four-choice questions regarding high school science
 and follows up to the Allen AI Science Kaggle challenge.%
-\footnote{https://www.kaggle.com/c/the-allen-ai-science-challenge}
+\footnote{\url{https://www.kaggle.com/c/the-allen-ai-science-challenge}}
 The vocabulary includes scientific jargon and named entities, and many questions
 are not factoid, requiring real-world reasoning or thought experiments.
 
@@ -247,7 +248,7 @@ We have combined each answer with the respective question (crudely by
 substituting wh-word in the question with the answer) and retrieved
 evidence sentences for each hypothesis using Solr search in a collection
 of CK-12 ``Concepts B'' textbooks.%
-\footnote{We have also tried, but the dataset is much harder.}
+\footnote{We have also tried English Wikipedia, but the dataset is much harder.}
 525 questions attained any supporting evidence.
 
 We consider this dataset as preliminary, because it was not reviewed
@@ -428,11 +429,12 @@ embedding comparisons.
 
 \subsection{Experimental Setup}
 
-We train the whole model from word embeddings to output evidence-integrated
+We implement the differentiable model in the Keras framework \cite{Keras} and
+train the whole network from word embeddings to output evidence-integrated
 hypothesis label using the binary cross-entropy loss as an objective%
 \footnote{Unlike \cite{HABCNN}, we have found ranking-based loss functions
 	ineffective for this task.}
-and the Adam optimization algorithm.  We apply $\mathbb{L}_2 = 10^-4$
+and the Adam optimization algorithm \cite{Adam}.  We apply $\mathbb{L}_2 = 10^-4$
 regularization and a $p=1/3$ dropout.
 
 Following the recommendation of \cite{sps}, we report expected test set
@@ -592,27 +594,31 @@ information to select relevant evidence, apparently.
 & joint & MC-160     &             &            & MC-500     &      & \\
 Model       & all (train)        & one & multi & all & one & multi & all \\
 \hline
+\hline
+hand-crafted &  & $0.842$ & $0.678$ & $0.753$ & $0.721$ & $0.679$ & $0.699$\\
+\hline
+\hline
 Attn. Reader & & $0.481$ & $0.447$ & $0.463$ & $0.444$ & $0.395$ & $0.419$ \\
 Neur. Reasoner & & $0.484$ & $0.468$ & $0.476$ & $0.457$ & $0.456$ & $0.456$ \\
-HABCNN-TE & & $0.633$ & $0.629$ & \textbf{0.631} & $0.542$ & $0.517$ & \textbf{0.529} \\
+HABCNN-TE & & $0.633$ & \textbf{0.629} & \textbf{0.631} & $0.542$ & \textbf{0.517} & $0.529$ \\
 \hline
-avg & $0.539$ & $0.526$ & $0.395$ & $0.442$ & $0.439$ & $0.410$ & $0.480$\\
- & $\quad^{\pm0.009}$ & $\quad^{\pm0.016}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.026}$ & $\quad^{\pm0.017}$ & $\quad^{\pm0.013}$ & $\quad^{\pm0.011}$\\
-DAN & $0.540$ & $0.543$ & $0.342$ & $0.431$ & $0.474$ & $0.418$ & $0.507$\\
- & $\quad^{\pm0.013}$ & $\quad^{\pm0.017}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.020}$ & $\quad^{\pm0.014}$ & $\quad^{\pm0.010}$ & $\quad^{\pm0.010}$\\
+avg & $0.577$ & $0.653$ & $0.471$ & $0.556$ & $0.587$ & $0.506$ & \textbf{0.542}\\
+ & $\quad^{\pm0.009}$ & $\quad^{\pm0.027}$ & $\quad^{\pm0.020}$ & $\quad^{\pm0.012}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.010}$ & $\quad^{\pm0.011}$\\
+DAN & $0.590$ & $0.681$ & $0.486$ & $0.577$ & \textbf{0.636} & $0.496$ & \textbf{0.560}\\
+ & $\quad^{\pm0.009}$ & $\quad^{\pm0.017}$ & $\quad^{\pm0.010}$ & $\quad^{\pm0.010}$ & $\quad^{\pm0.013}$ & $\quad^{\pm0.007}$ & $\quad^{\pm0.007}$\\
 \hline
-RNN & $0.661$ & $0.477$ & $0.395$ & $0.449$ & $0.397$ & $0.349$ & $0.424$\\
- & $\quad^{\pm0.059}$ & $\quad^{\pm0.039}$ & $\quad^{\pm0.028}$ & $\quad^{\pm0.042}$ & $\quad^{\pm0.021}$ & $\quad^{\pm0.017}$ & $\quad^{\pm0.017}$\\
-CNN & $0.680$ & $0.539$ & $0.431$ & $0.486$ & $0.425$ & $0.373$ & $0.440$\\
- & $\quad^{\pm0.050}$ & $\quad^{\pm0.023}$ & $\quad^{\pm0.023}$ & $\quad^{\pm0.028}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.013}$ & $\quad^{\pm0.014}$\\
-RNN-CNN & $0.561$ & $0.513$ & $0.371$ & $0.421$ & $0.423$ & $0.378$ & $0.453$\\
- & $\quad^{\pm0.071}$ & $\quad^{\pm0.029}$ & $\quad^{\pm0.026}$ & $\quad^{\pm0.033}$ & $\quad^{\pm0.026}$ & $\quad^{\pm0.019}$ & $\quad^{\pm0.017}$\\
-attn1511 & $0.749$ & $0.471$ & $0.402$ & $0.436$ & $0.400$ & $0.383$ & $0.454$\\
- & $\quad^{\pm0.102}$ & $\quad^{\pm0.045}$ & $\quad^{\pm0.032}$ & $\quad^{\pm0.031}$ & $\quad^{\pm0.034}$ & $\quad^{\pm0.016}$ & $\quad^{\pm0.028}$\\
-Ubu.\ RNN & $0.746$ & $0.572$ & $0.410$ & $0.541$ & $0.517$ & $0.383$ & \textbf{0.511}\\
- & $\quad^{\pm0.084}$ & $\quad^{\pm0.025}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.033}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.015}$ & $\quad^{\pm0.022}$\\
+RNN & $0.608$ & $0.583$ & $0.490$ & $0.533$ & $0.539$ & $0.456$ & $0.494$\\
+ & $\quad^{\pm0.030}$ & $\quad^{\pm0.033}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.020}$ & $\quad^{\pm0.016}$ & $\quad^{\pm0.013}$ & $\quad^{\pm0.012}$\\
+CNN & $0.658$ & $0.655$ & $0.511$ & $0.578$ & $0.571$ & $0.483$ & $0.522$\\
+ & $\quad^{\pm0.021}$ & $\quad^{\pm0.020}$ & $\quad^{\pm0.012}$ & $\quad^{\pm0.014}$ & $\quad^{\pm0.013}$ & $\quad^{\pm0.012}$ & $\quad^{\pm0.009}$\\
+RNN-CNN & $0.597$ & $0.617$ & $0.493$ & $0.551$ & $0.554$ & $0.470$ & $0.508$\\
+ & $\quad^{\pm0.039}$ & $\quad^{\pm0.041}$ & $\quad^{\pm0.021}$ & $\quad^{\pm0.020}$ & $\quad^{\pm0.023}$ & $\quad^{\pm0.016}$ & $\quad^{\pm0.014}$\\
+attn1511 & $0.687$ & $0.611$ & $0.485$ & $0.544$ & $0.571$ & $0.454$ & $0.507$\\
+ & $\quad^{\pm0.061}$ & $\quad^{\pm0.052}$ & $\quad^{\pm0.025}$ & $\quad^{\pm0.033}$ & $\quad^{\pm0.036}$ & $\quad^{\pm0.011}$ & $\quad^{\pm0.021}$\\
+Ubu.\ RNN & $0.678$ & \textbf{0.736} & $0.503$ & \textbf{0.612} & \textbf{0.641} & $0.452$ & \textbf{0.538}\\
+ & $\quad^{\pm0.035}$ & $\quad^{\pm0.033}$ & $\quad^{\pm0.016}$ & $\quad^{\pm0.023}$ & $\quad^{\pm0.017}$ & $\quad^{\pm0.017}$ & $\quad^{\pm0.015}$\\
 \hline
-$^*$ Ubu.\ RNN & & $0.621$ & $0.417$ & $0.617$ & $0.571$ & $0.412$ & $0.560$ \\
+$^*$ Ubu.\ RNN & & $0.786$ & $0.547$ & $0.658$ & $0.676$ & $0.494$ & $0.577$ \\
 \hline
 \end{tabular}
 \setlength{\tabcolsep}{6pt}
@@ -620,8 +626,9 @@ $^*$ Ubu.\ RNN & & $0.621$ & $0.417$ & $0.617$ & $0.571$ & $0.412$ & $0.560$ \\
 \caption{\footnotesize%
 	Model (question-level) accuracy on the test split of the MCTest task, using the evidence weighing scheme.
 	The first column shows accuracy on a train split joined across both datasets.\\
-	$^*$ The top test set result across 16 runs, demonstrating the importance
-	of reporting neural evaluation results statistically.
+	$^*$ The model with top MC-500 test set result (across 16 runs)
+	that convincingly dominates HABCNN-TE in the \textit{one} and \textit{all} classes and illustrates that the issue of
+	reporting evaluation spread is not just theoretical. 5/16 of the models have MC-160 \textit{all} accuracy $>0.631$.
 }
 \label{tab:mctest}
 \end{figure*}
@@ -633,13 +640,13 @@ $^*$ Ubu.\ RNN & & $0.621$ & $0.417$ & $0.617$ & $0.571$ & $0.412$ & $0.560$ \\
 \hline
 Model              & Mean Ev. & BM25 Feat. & Weighed \\
 \hline
-avg & $0.334$ & $0.409$ & \textbf{0.480}\\
- & $\quad^{\pm0.012}$ & $\quad^{\pm0.026}$ & $\quad^{\pm0.011}$\\
+avg & $0.423$ & $0.506$ & \textbf{0.542}\\
+ & $\quad^{\pm0.014}$ & $\quad^{\pm0.012}$ & $\quad^{\pm0.011}$\\
 \hline
-CNN & $0.264$ & $0.413$ & \textbf{0.440}\\
- & $\quad^{\pm0.030}$ & $\quad^{\pm0.017}$ & $\quad^{\pm0.014}$\\
-Ubu.\ RNN & $0.437$ & $0.418$ & \textbf{0.511}\\
- & $\quad^{\pm0.041}$ & $\quad^{\pm0.025}$ & $\quad^{\pm0.022}$\\
+CNN & $0.373$ & \textbf{0.509} & \textbf{0.522}\\
+ & $\quad^{\pm0.036}$ & $\quad^{\pm0.027}$ & $\quad^{\pm0.009}$\\
+Ubu.\ RNN & $0.507$ & $0.509$ & \textbf{0.538}\\
+ & $\quad^{\pm0.014}$ & $\quad^{\pm0.012}$ & $\quad^{\pm0.015}$\\
 \hline
 \end{tabular}
 \setlength{\tabcolsep}{6pt}
@@ -650,32 +657,34 @@ Ubu.\ RNN & $0.437$ & $0.418$ & \textbf{0.511}\\
 \label{tab:mctestev}
 \end{figure}
 
-In Fig.~\ref{tab:mctest}, we compare our proposed models with past neural models
+In Fig.~\ref{tab:mctest}, we compare our proposed models with the current state-of-art
+ensemble of hand-crafted syntactic and frame-semantic features \cite{MCWang},
+as well as past neural models
 from the literature, all using attention mechanisms --- the Attentive Reader of \cite{ReadComprehend},
 Neural Reasoner of \cite{NeuralReasoner} and the HABCNN model family of \cite{HABCNN}.%
 \footnote{\cite{HABCNN} also reports the results on the former models.}
-We see that on the harder task, our proposed transfer model equals the best
-so far reported model of HABCNN-TE.\@  The previous work did not include
-confidence intervals, even though their model should also be stochastically initialized,
-so we cannot precisely judge their stastical relation but assume the models
-to be equivalent on the MC-500 dataset.
+We see that averaging-based models are surprisingly effective on this task,
+and in particular on the MC-500 dataset it can beat even the best so far reported model of HABCNN-TE.\@
+Our proposed transfer model is statistically equivalent to the best model on both datasets
+(furthermore, previous work did not include
+confidence intervals, even though their models should also be stochastically initialized).
 
 As expected, our models did badly on the multiple-evidence class of questions
 --- we made no attempt to model information flow across adjacent evidence in our
-models since this aspect as this aspect is unique to the MCTest task in the
+models since this aspect is unique to the MCTest task in the
 context of this work.
 
 % TODO: train on one-type only
 
-Interestingly, on the MCTest task, evidence weighing plays an important role
+Interestingly, on the MCTest task, evidence weighing does play an important role
 as shown in Fig.~\ref{tab:mctestev},
-significantly boosting the accuracy of all models.
+significantly boosting model accuracy.
 This confirms that a way to allocate attention to different sentences
 is indeed crucial for this task.
 
 \subsection{Analysis}
 
-While we can universally proclaim Ubu.\ RNN as the winning model,
+While we can universally proclaim Ubu.\ RNN as the best model,
 we observe many aspects of the Hypothesis Evaluation problem that are shared
 by the AI2-8grade/CK12 and MCTest tasks, but not by the Argus task.
 
@@ -701,19 +710,20 @@ in the IR pipeline that produced the dataset.
 We see from training versus test accuracies that RNN-based
 models (including the word-level attention model) have a strong tendency
 to overfit on our small datasets, while CNN is much more resilient.
-We speculate that we simply might not have enough training data to
-properly train the relatively complex attention model.%
+While word-level attention seems appealing for such a task,
+we speculate that we simply might not have enough training data to
+properly train it.%
 \footnote{Just reducing the dimensionality of hidden representations did not yield an improvement.}
-Investigating attention transfer is a point for future work, but
-our preliminary experiments on multiple datasets indicate that attention
+Investigating attention transfer is a point for future work --- our
+preliminary experiments on multiple datasets indicate that attention
 models are more task specific than the recurrent text comprehension models
 of memory cell based RNNs.
 
 
 % TODO error analysis (mainly team X beats Y vs.\ team Y beats X)
 
-One concrete limitations of our models in case of the Argus task
-is problem reconciling particular named entities.
+One concrete limitation of our models in case of the Argus task
+is a problem of reconciling particular named entity instances.
 The more obvious form of this issue is \textit{Had Roger Federer beat Martin Cilic in US OPEN 2014?}
 versus an opposite \textit{Had Martin Cilic beat Roger Federer in US OPEN 2014?} ---
 another form of this problem is reconciling a hypothesis like
@@ -732,55 +742,56 @@ semantic vector space.
 We have established a general Hypothesis Evaluation task with three datasets
 of various properties, and shown that neural models can exhibit strong
 performance (with less hand-crafting effort than non-neural classifiers).
-We proposed an evidence weighing model that is never harmful and improves
+We propose an evidence weighing model that is never harmful and improves
 performance on some tasks.
 We also demonstrate that simple models can outperform or closely match
 performance of complex architectures;
-all the models we consider are very task-independent and were successfully
+all the models we consider are task-independent and were successfully
 used in different contexts than Hypothesis Evaluation \cite{sps}.
 Our results empirically show that a basic RNN text comprehension model
-well tuned on a large dataset (even if the task is unrelated and vocabulary
+well trained on a large dataset (even if the task is unrelated and vocabulary
 characteristics are very different) outperforms or matches more complex
 architectures trained only on the dataset of the task at hand.%
 \footnote{Even if these use multi-task learning, which was employed in case
 of the HABCNN models that were trained to also predict question classes.}
 
-Finally, on the MCTest dataset, our best proposed model is statistically
+Finally, on the MCTest dataset, our best proposed model is better
+of statistically
 indistinguishable from the best neural network model reported so far
 \cite{HABCNN},
-even though it has much simpler architecture and only a simple attention
+even though it has a simpler architecture and only a naive attention
 mechanism.
 
-We would like to draw three recommendations for future research from our findings:
+We would like to draw several recommendations for future research from our findings:
 (A) encourage usage of basic neural architectures as evaluation baselines;
-(B) suggest that future research includes models pretrained on large data as
-baselines; and
-(C) for randomized models (e.g.\ neural networks with random weight
-initialization and batch shuffling), report expected test set performance
+(B) suggest that future research includes models pretrained on large data as baselines;
+(C) validate complex architectures on tasks with large datasets if they cannot beat baselines on small datasets; and
+(D) for randomized machine comprehension models (e.g.\ neural networks with random weight
+initialization, batch shuffling or probabilistic dropout), report expected test set performance
 based on multiple independent training runs.
 
 As a general advice for solving complex tasks with small datasets,
-besides the point (B) above our analysis points at convolutional networks
+besides the point (B) above our analysis suggests convolutional networks
 as the best models regarding the tendency to overfit, unless
-semantic composionality plays an important role in the task;
+semantic composionality plays a crucial role in the task;
 in this scenario, simple averaging-based models are a great start as well.
 Preinitializing a model also helps against overfitting.
 
 We release our implementation of the Argus task, evidence integration
-models and processing of all the reported datasets as open source.%
+models and processing of all the evaluated datasets as open source.%
 %\footnote{\url{https://github.com/brmson/dataset-sts} task \textit{hypev}}
 \footnote{redacted}
 
 We believe the next step towards machine comprehension NLP models
 that are based on deep learning but capable of dealing with real-world,
 large-vocabulary data will involve research into a better way to deal with
-entities without available embeddings, as shown in the error analysis.
+entities without available embeddings, as mentioned in the analysis above.
 In the realm of embeddings, simple word-level attention mechanisms will not do.
-A promising approach could address
-the flexibility of the final representation, moving from attention mechanism
+A promising approach could extend
+the flexibility of the final sentence representation, moving from attention mechanism
 to a memory mechanism\footnote{Not necessarily ``memories'' in the sense of Memory Networks.}
 by allowing the network to remember a set of ``facts'' derived from each sentence;
-related work has been done on end-to-end differentiable shift-reduce parsers
+related work has been done for example on end-to-end differentiable shift-reduce parsers
 with LSTM as stack cells \cite{EndToEndParsing}.
 
 
