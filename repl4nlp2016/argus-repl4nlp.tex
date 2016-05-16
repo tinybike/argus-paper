@@ -342,14 +342,14 @@ for deep learning of sentence pair scoring functions. \cite{sps}
 
 We refer the reader to \cite{sps} and its references for detailed
 model descriptions.  We evaluate an \textbf{RNN} model which uses bidirectionally
-summed GRU memory cells and uses the final states as embeddings;
-a \textbf{CNN} model which uses sentence-max-pooled filters as embeddings;
+summed GRU memory cells \cite{GRU} and uses the final states as embeddings;
+a \textbf{CNN} model which uses sentence-max-pooled convolutional filters as embeddings \cite{KimMultichannelCNN};
 a \textbf{RNN-CNN} model which puts the CNN on top of per-token GRU outputs
-rather than the word embeddings; and an \textbf{attn1511} model
+rather than the word embeddings \cite{attn1511}; and an \textbf{attn1511} model
 inspired by \cite{attn1511} that integrates the RNN-CNN model
 with per-word attention to build hypothesis-specific evidence embeddings.
 We also report the baseline results of
-\textbf{avg} mean of word embeddings in the sentence
+\textbf{avg} mean of word embeddings in the sentence with projection matrix
 and \textbf{DAN} Deep Averaging Network model that employs word-level dropout
 and adds multiple nonlinear transformations on top of the averaged sentence
 emebddings \cite{DAN}.
@@ -364,9 +364,11 @@ that models per-token attention more independently:
 $$ s_{h,e}(t) = \sigma(a_{h,e}(t)) / \max_{t'} \sigma(a_{h,e}(t')) $$
 We also use relu instead of tanh as the CNN transfer function.
 
-As model input, we use the standard GloVe embeddings \cite{GloVe}.
-Relative to \cite{sps}, we introduce two differences to the word
-embedding --- we use 50-dimensional embeddings instead of 300-dimensional
+As model input, we use the standard GloVe embeddings \cite{GloVe}
+extended with binary inputs denoting token type and overlap with token or bigram in the paired sentence,
+as described in \cite{sps}.
+However, we introduce two changes to the word
+embedding model --- we use 50-dimensional embeddings instead of 300-dimensional,
 and rather than building an adaptable embedding matrix only from the
 training set words preinitialized by GloVe, we use only the top 100
 most frequent tokens in the adaptable embedding matrix and use
@@ -390,7 +392,9 @@ with the dot-product scoring used for Ubuntu Dialogue training replaced by MLP p
 \subsection{Evidence Integration}
 
 Our main proposed schema for evidence integration is \textbf{Evidence Weighing}.
-From each pair of hypothesis and evidence embeddings, we produce two $[0,1]$
+From each pair of hypothesis and evidence embeddings,%
+\footnote{We employ Siamese training, sharing the weights between hypothesis and evidence embedding models.}
+we produce two $[0,1]$
 predictions using a pair of MLP point-scorers of \texttt{dataset-sts} \cite{sps}%
 \footnote{From the elementwise product
 and sum of the embeddings, a linear classifier directly produces a prediction;
@@ -406,6 +410,7 @@ We do not have access to any explicit labels for the evidence,
 but we train the model end-to-end with just $y$ labels and the formula
 for $y$ is differentiable, carrying over the gradient to the sentence
 embedding model.
+This can be thought of as a simple passage-wide attention model.
 
 As a baseline strategy, we also consider \textbf{Evidence Averaging}, where
 we simply produce a single scalar prediction per hypothesis-evidence pair
@@ -582,38 +587,39 @@ information to select relevant evidence, apparently.
 \begin{figure*}[t]
 \centering
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{|c|ccc|ccc|}
+\begin{tabular}{|c|c|ccc|ccc|}
 \hline
-                   & MC-160     &             &            & MC-500     &      & \\
-Model              & one & many & all & one & many & all \\
+& joint & MC-160     &             &            & MC-500     &      & \\
+Model       & all (train)        & one & multi & all & one & multi & all \\
 \hline
-Attn. Reader & $0.481$ & $0.447$ & $0.463$ & $0.444$ & $0.395$ & $0.419$\\
-Neur. Reasoner & $0.484$ & $0.468$ & $0.476$ & $0.457$ & $0.456$ & $0.456$\\
-HABCNN-TE & $0.633$ & $0.629$ & \textbf{0.631} & $0.542$ & $0.517$ & \textbf{0.529}\\
+Attn. Reader & & $0.481$ & $0.447$ & $0.463$ & $0.444$ & $0.395$ & $0.419$ \\
+Neur. Reasoner & & $0.484$ & $0.468$ & $0.476$ & $0.457$ & $0.456$ & $0.456$ \\
+HABCNN-TE & & $0.633$ & $0.629$ & \textbf{0.631} & $0.542$ & $0.517$ & \textbf{0.529} \\
 \hline
-avg & $0.526$ & $0.395$ & $0.442$ & $0.439$ & $0.410$ & $0.480$\\
- & $\quad^{\pm0.016}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.026}$ & $\quad^{\pm0.017}$ & $\quad^{\pm0.013}$ & $\quad^{\pm0.011}$\\
-DAN & $0.543$ & $0.342$ & $0.431$ & $0.474$ & $0.418$ & $0.507$\\
- & $\quad^{\pm0.017}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.020}$ & $\quad^{\pm0.014}$ & $\quad^{\pm0.010}$ & $\quad^{\pm0.010}$\\
+avg & $0.539$ & $0.526$ & $0.395$ & $0.442$ & $0.439$ & $0.410$ & $0.480$\\
+ & $\quad^{\pm0.009}$ & $\quad^{\pm0.016}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.026}$ & $\quad^{\pm0.017}$ & $\quad^{\pm0.013}$ & $\quad^{\pm0.011}$\\
+DAN & $0.540$ & $0.543$ & $0.342$ & $0.431$ & $0.474$ & $0.418$ & $0.507$\\
+ & $\quad^{\pm0.013}$ & $\quad^{\pm0.017}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.020}$ & $\quad^{\pm0.014}$ & $\quad^{\pm0.010}$ & $\quad^{\pm0.010}$\\
 \hline
-RNN & $0.477$ & $0.395$ & $0.449$ & $0.397$ & $0.349$ & $0.424$\\
- & $\quad^{\pm0.039}$ & $\quad^{\pm0.028}$ & $\quad^{\pm0.042}$ & $\quad^{\pm0.021}$ & $\quad^{\pm0.017}$ & $\quad^{\pm0.017}$\\
-CNN & $0.539$ & $0.431$ & $0.486$ & $0.425$ & $0.373$ & $0.440$\\
- & $\quad^{\pm0.023}$ & $\quad^{\pm0.023}$ & $\quad^{\pm0.028}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.013}$ & $\quad^{\pm0.014}$\\
-RNN-CNN & $0.513$ & $0.371$ & $0.421$ & $0.423$ & $0.378$ & $0.453$\\
- & $\quad^{\pm0.029}$ & $\quad^{\pm0.026}$ & $\quad^{\pm0.033}$ & $\quad^{\pm0.026}$ & $\quad^{\pm0.019}$ & $\quad^{\pm0.017}$\\
-attn1511 & $0.471$ & $0.402$ & $0.436$ & $0.400$ & $0.383$ & $0.454$\\
- & $\quad^{\pm0.045}$ & $\quad^{\pm0.032}$ & $\quad^{\pm0.031}$ & $\quad^{\pm0.034}$ & $\quad^{\pm0.016}$ & $\quad^{\pm0.028}$\\
-Ubu.\ RNN & $0.572$ & $0.410$ & $0.541$ & $0.517$ & $0.383$ & \textbf{0.511}\\
- & $\quad^{\pm0.025}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.033}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.015}$ & $\quad^{\pm0.022}$\\
+RNN & $0.661$ & $0.477$ & $0.395$ & $0.449$ & $0.397$ & $0.349$ & $0.424$\\
+ & $\quad^{\pm0.059}$ & $\quad^{\pm0.039}$ & $\quad^{\pm0.028}$ & $\quad^{\pm0.042}$ & $\quad^{\pm0.021}$ & $\quad^{\pm0.017}$ & $\quad^{\pm0.017}$\\
+CNN & $0.680$ & $0.539$ & $0.431$ & $0.486$ & $0.425$ & $0.373$ & $0.440$\\
+ & $\quad^{\pm0.050}$ & $\quad^{\pm0.023}$ & $\quad^{\pm0.023}$ & $\quad^{\pm0.028}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.013}$ & $\quad^{\pm0.014}$\\
+RNN-CNN & $0.561$ & $0.513$ & $0.371$ & $0.421$ & $0.423$ & $0.378$ & $0.453$\\
+ & $\quad^{\pm0.071}$ & $\quad^{\pm0.029}$ & $\quad^{\pm0.026}$ & $\quad^{\pm0.033}$ & $\quad^{\pm0.026}$ & $\quad^{\pm0.019}$ & $\quad^{\pm0.017}$\\
+attn1511 & $0.749$ & $0.471$ & $0.402$ & $0.436$ & $0.400$ & $0.383$ & $0.454$\\
+ & $\quad^{\pm0.102}$ & $\quad^{\pm0.045}$ & $\quad^{\pm0.032}$ & $\quad^{\pm0.031}$ & $\quad^{\pm0.034}$ & $\quad^{\pm0.016}$ & $\quad^{\pm0.028}$\\
+Ubu.\ RNN & $0.746$ & $0.572$ & $0.410$ & $0.541$ & $0.517$ & $0.383$ & \textbf{0.511}\\
+ & $\quad^{\pm0.084}$ & $\quad^{\pm0.025}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.033}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.015}$ & $\quad^{\pm0.022}$\\
 \hline
-$^*$ Ubu.\ RNN & $0.621$ & $0.417$ & $0.617$ & $0.571$ & $0.412$ & $0.560$\\
+$^*$ Ubu.\ RNN & & $0.621$ & $0.417$ & $0.617$ & $0.571$ & $0.412$ & $0.560$ \\
 \hline
 \end{tabular}
 \setlength{\tabcolsep}{6pt}
 \vspace*{-0.2cm}
 \caption{\footnotesize%
-	Model (question-level) accuracy on the MCTest task, using the evidence weighing scheme. \\
+	Model (question-level) accuracy on the test split of the MCTest task, using the evidence weighing scheme.
+	The first column shows accuracy on a train split joined across both datasets.\\
 	$^*$ The top test set result across 16 runs, demonstrating the importance
 	of reporting neural evaluation results statistically.
 }
@@ -639,7 +645,7 @@ Ubu.\ RNN & $0.437$ & $0.418$ & \textbf{0.511}\\
 \setlength{\tabcolsep}{6pt}
 \vspace*{-0.2cm}
 \caption{\footnotesize%
-	Comparing the influence of the evidence integration schemes on the MC-500 test accuracy.
+	Comparing the influence of the evidence integration schemes on the MC-500 (all-type) test accuracy.
 }
 \label{tab:mctestev}
 \end{figure}
@@ -648,11 +654,18 @@ In Fig.~\ref{tab:mctest}, we compare our proposed models with past neural models
 from the literature, all using attention mechanisms --- the Attentive Reader of \cite{ReadComprehend},
 Neural Reasoner of \cite{NeuralReasoner} and the HABCNN model family of \cite{HABCNN}.%
 \footnote{\cite{HABCNN} also reports the results on the former models.}
-We see that on the harder task, our model equals the best
+We see that on the harder task, our proposed transfer model equals the best
 so far reported model of HABCNN-TE.\@  The previous work did not include
 confidence intervals, even though their model should also be stochastically initialized,
 so we cannot precisely judge their stastical relation but assume the models
 to be equivalent on the MC-500 dataset.
+
+As expected, our models did badly on the multiple-evidence class of questions
+--- we made no attempt to model information flow across adjacent evidence in our
+models since this aspect as this aspect is unique to the MCTest task in the
+context of this work.
+
+% TODO: train on one-type only
 
 Interestingly, on the MCTest task, evidence weighing plays an important role
 as shown in Fig.~\ref{tab:mctestev},
@@ -660,26 +673,62 @@ significantly boosting the accuracy of all models.
 This confirms that a way to allocate attention to different sentences
 is indeed crucial for this task.
 
+\subsection{Analysis}
+
+While we can universally proclaim Ubu.\ RNN as the winning model,
+we observe many aspects of the Hypothesis Evaluation problem that are shared
+by the AI2-8grade/CK12 and MCTest tasks, but not by the Argus task.
+
+Our largest surprise lies in the ineffectivity of evidence weighing
+on the Argus task, since observations of irrelevant passages initially
+led us to investigate this model.  % TODO details
+We may also see that non-pretrained RNN does very well on the Argus task
+while CNN is a better model otherwise.
+
+An aspect that could explain this rift is that the latter two tasks
+are primarily \textit{retrieval} based, where we seek to judge each
+evidence as irrelevant or essentially a paraphrase of the hypothesis.
+On the other hand, the Argus task is highly \textit{semantic}
+and compositional, with the questions often differing just by a presence
+of negation --- recurrent model that can capture long-term dependencies
+and alter sentence representations based on the presence of negation
+may represent an essential improvement over an n-gram-like convolutional
+scheme.
+The lack of success of evidence weighing in the Argus task might be also
+attributed to a more conservative scheme of passage retrieval employed
+in the IR pipeline that produced the dataset.
+
+We see from training versus test accuracies that RNN-based
+models (including the word-level attention model) have a strong tendency
+to overfit on our small datasets, while CNN is much more resilient.
+We speculate that we simply might not have enough training data to
+properly train the relatively complex attention model.%
+\footnote{Just reducing the dimensionality of hidden representations did not yield an improvement.}
+Investigating attention transfer is a point for future work, but
+our preliminary experiments on multiple datasets indicate that attention
+models are more task specific than the recurrent text comprehension models
+of memory cell based RNNs.
+
 
 % TODO error analysis (mainly team X beats Y vs.\ team Y beats X)
-
-% TODO compare rnn,cnn,attn1511
 
 \section{Conclusion}
 \label{sec:concl}
 
-We have established the Hypothesis Evaluation task with three datasets
+We have established a general Hypothesis Evaluation task with three datasets
 of various properties, and shown that neural models can exhibit strong
 performance (with less hand-crafting effort than non-neural classifiers).
+We proposed an evidence weighing model that is never harmful and improves
+performance on some tasks.
 We also demonstrate that simple models can outperform or closely match
-performance of complicated architectures;
+performance of complex architectures;
 all the models we consider are very task-independent and were successfully
 used in different contexts than Hypothesis Evaluation \cite{sps}.
 Our results empirically show that a basic RNN text comprehension model
 well tuned on a large dataset (even if the task is unrelated and vocabulary
-characteristics are very different) outperforms more complex architectures
-trained only on the dataset of the task at hand.%
-\footnote{This beats even multi-task learning, which was employed in case
+characteristics are very different) outperforms or matches more complex
+architectures trained only on the dataset of the task at hand.%
+\footnote{Even if these use multi-task learning, which was employed in case
 of the HABCNN models that were trained to also predict question classes.}
 
 Finally, on the MCTest dataset, our best proposed model is statistically
@@ -688,13 +737,20 @@ indistinguishable from the best neural network model reported so far
 even though it has much simpler architecture and only a simple attention
 mechanism.
 
-We would like to draw three recommendations from our findings:
+We would like to draw three recommendations for future research from our findings:
 (A) encourage usage of basic neural architectures as evaluation baselines;
 (B) suggest that future research includes models pretrained on large data as
 baselines; and
 (C) for randomized models (e.g.\ neural networks with random weight
 initialization and batch shuffling), report expected test set performance
 based on multiple independent training runs.
+
+As a general advice for solving complex tasks with small datasets,
+besides the point (B) above our analysis points at convolutional networks
+as the best models regarding the tendency to overfit, unless
+semantic composionality plays an important role in the task;
+in this scenario, simple averaging-based models are a great start as well.
+Preinitializing a model also helps against overfitting.
 
 We release our implementation of the Argus task, evidence integration
 models and processing of all the reported datasets as open source.%
