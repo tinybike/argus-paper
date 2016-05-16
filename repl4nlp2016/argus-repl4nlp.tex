@@ -434,7 +434,7 @@ train the whole network from word embeddings to output evidence-integrated
 hypothesis label using the binary cross-entropy loss as an objective%
 \footnote{Unlike \cite{HABCNN}, we have found ranking-based loss functions
 	ineffective for this task.}
-and the Adam optimization algorithm \cite{Adam}.  We apply $\mathbb{L}_2 = 10^-4$
+and the Adam optimization algorithm \cite{Adam}.  We apply $\mathbb{L}_2 = 10^{-4}$
 regularization and a $p=1/3$ dropout.
 
 Following the recommendation of \cite{sps}, we report expected test set
@@ -676,7 +676,7 @@ context of this work.
 
 % TODO: train on one-type only
 
-Interestingly, on the MCTest task, evidence weighing does play an important role
+Interestingly, on the MCTest task evidence weighing does play an important role
 as shown in Fig.~\ref{tab:mctestev},
 significantly boosting model accuracy.
 This confirms that a way to allocate attention to different sentences
