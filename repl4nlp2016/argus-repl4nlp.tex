@@ -98,33 +98,37 @@ on knowledge from fulltext data like encyclopedic articles, scientific
 papers or news articles.
 Such machine reasoning systems, like humans researching a problem,
 must be able to recover evidence from large amounts of retrieved
-but likely irrelevant information and judge what answer the evidence entails
-to the question at hand.
+but mostly irrelevant information and judge the evidence to decide
+the answer to the question at hand.
 
 A typical approach, used implicitly in information retrieval
 (and its extensions, like IR-based Question Answering systems \cite{YodaQAPoster2015}),
 is to determine evidence relevancy by a keyword overlap feature (like tf-idf or BM-25 \cite{BM25})
 and prune the evidence by the relevancy score.
-On the other hand, textual entialment systems that seek to confirm hypotheses
+On the other hand, textual entailment systems that seek to confirm hypotheses
 based on evidence \cite{RTE1} \cite{SICK2014} \cite{SNLI}
 are typically provided with only a single piece of evidence
 or only evidence pre-determined as relevant, and are often restricted
 to short and simple sentences without open-domain named entity occurences.
-
+%
 In this work, we seek to fuse information retrieval and textual entaiment
-recognition by defining the \textbf{Argus Yes/No Question Answering} task.
+recognition by defining the \textbf{Hypothesis Evaluation} task
+as deciding the truth value of a hypothesis by integrating numerous
+pieces of evidence, not all of it equally relevant.
+
+As a specific instance, we introduce the
+\textbf{Argus Yes/No Question Answering} task.
 The problem is, given a real-world event binary question like
-\textit{Did Donald Trump announce he is running for president?}
+\textit{Did Donald Trump announce he is running for president?}\ 
 and numerous retrieved news article fragments as evidence,
 to determine the answer for the question.
-We further generalize this problem and propose a \textbf{Hypothesis Evaluation}
-where the questions and evidence can vary in form, size and vocabulary.
-
+%
 Our research is motivated by the Argus automatic reporting system for
-the Augur prediction market paltform. \cite{argus}  Therefore, we consider the question answering task
-within the constraints of a practical task that has limited available dataset
-and only minimum supervision.  Hence, the evidence are authentic news
-sentences (with noise like segmentation errors, irrelevant participial phrases, etc.),
+the Augur prediction market platform. \cite{argus}
+Therefore, we consider the question answering task
+within the constraints of a practical scenario that has limited available dataset
+and only minimum supervision.  Hence, authentic news
+sentences are the evidence (with noise like segmentation errors, irrelevant participial phrases, etc.),
 and whereas we have gold standard for
 the correct answers, the model must do without explicit supervision on
 which individual evidence snippets are relevant and what do they entail.
@@ -136,9 +140,10 @@ that (A) learns sentence embeddings for the question and evidence,
 as linear classifier inputs, and (C) the model aggregates all available evidence
 to produce a binary signal as the answer, which is the only training supervision.
 
-A related task concerns ranking answers of multiple-choice questions given
-a set of evidencing sentences.  We evaluate our model on this task as well,
-considering the MCTest dataset and the AI2-8grade/CK12 dataset that we introduce
+We also evaluate our model on
+a related task that concerns ranking answers of multiple-choice questions given
+a set of evidencing sentences.
+We consider the MCTest dataset and the AI2-8grade/CK12 dataset that we introduce
 below.
 
 The paper is structured as follows.  In Sec.~\ref{sec:argus}, we formally outline
@@ -154,7 +159,7 @@ and conclude with a summary, model usage recommendations and future work directi
 
 Formally, the Hypothesis Evaluation task is to build a function $y_i = f_h(H_i)$,
 where $y_i \in [0,1]$ is a binary label (\textit{no} towards \textit{yes})
-and $H_i = (q_i, M_i)$ is a hypothesis in the form of question text $q_i$
+and $H_i = (q_i, E_i)$ is a hypothesis instance in the form of question text $q_i$
 and a set of $E_i = \{e_{ij}\}$ evidence texts $e_{ij}$ as extracted
 from an evidence-carrying corpus.
 
@@ -166,8 +171,8 @@ the \textbf{Argus} system \cite{arguswp} \cite{argus}
 is to automatically analyze and answer questions
 in the context of the \textbf{Augur} prediction market platform.%
 \footnote{\url{https://augur.net/}}
-In a prediction market, some users pose questions about the future
-whereas other users bet on the \textit{yes} or \textit{no} answer,
+In a prediction market, users pose questions about future events
+whereas others bet on the \textit{yes} or \textit{no} answer,
 with the assumption that the bet price reflects the real probability
 of the event.  At a specified moment (e.g.\ after the date of a to-be-predicted sports match), the
 correct answer is retroactively determined and the bets are paid off.
@@ -177,10 +182,10 @@ This motivates the Argus system, which should partially automate
 this determination --- deciding questions related to recent events
 based on open news sources.
 
-To help develop a machine learning model for the $f_h$ function,
-we have created a dataset of questions with gold labels, and used
-this dataset with an IR information retrieval component of the Argus
-system to generate evidence texts from a variety of news papers.
+To train a machine learning model for the $f_h$ function,
+we have created a dataset of questions with gold labels, and
+produced sets of evidence texts from a variety of news paper using
+a pre-existing IR (information retrieval) component of the Argus system.
 We release this dataset openly.%
 %\footnote{redacted}
 \footnote{\url{https://github.com/brmson/dataset-sts} directory data/hypev/argus}
@@ -191,18 +196,18 @@ and topic domain was focused to politics, sports and the stock market.
 To build the question dataset, we have used several sources:
 \begin{itemize}
 	\item We asked Amazon Mechanical Turk users to pose questions, together with a golden label and a news article reference.
-		This seeded the dataset with initial, somewhat repetitive 250 questions.
+		This seeded the dataset with initial, somewhat redundant 250 questions.
 	\item We manually extended this dataset by derived questions with reversed polarity (to obtain an opposite answer).
-	\item We extended the data with questions autogenerated from templates, pertaining top sporting event winners and US senate or gubernatorial elections.
+	\item We extended the data with questions autogenerated from 26 templates, pertaining top sporting event winners and US senate or gubernatorial elections.
 \end{itemize}
 
-To build the evidence dataset, we used the \textbf{Syphon} component
+To build the evidence dataset, we used the \textbf{Syphon} preprocessing component
 \cite{argus}
-of the stock Argus implementation%
+of the Argus implementation%
 \footnote{\url{https://github.com/AugurProject/argus}}
 to identify semantic roles of all question tokens and produce
 the search keywords if a role was assigned to each token.
-We then used the stock IR component to query a corpus of newspaper
+We then used the IR component to query a corpus of newspaper
 articles, and kept sentences that contained at least 2/3 of all
 the keywords.
 Our corpus of articles contained articles from The Guardian (all articles) and from the New York Times (Sports, Politics and Business sections).  Furthermore, we scraped partial archive.org historical data out of 35 RSS feeds from CNN, Reuters, BBC International, CBS News, ABC News, c|net, Financial Times, Skynews and the Washington Post.
@@ -244,20 +249,20 @@ and follows up to the Allen AI Science Kaggle challenge.%
 The vocabulary includes scientific jargon and named entities, and many questions
 are not factoid, requiring real-world reasoning or thought experiments.
 
-We have combined each answer with the respective question (crudely by
-substituting wh-word in the question with the answer) and retrieved
+We have combined each answer with the respective question (by
+substituting the \textit{wh}-word in the question by each answer) and retrieved
 evidence sentences for each hypothesis using Solr search in a collection
 of CK-12 ``Concepts B'' textbooks.%
 \footnote{We have also tried English Wikipedia, but the dataset is much harder.}
 525 questions attained any supporting evidence.
 
-We consider this dataset as preliminary, because it was not reviewed
+We consider this dataset as \textit{preliminary} since it was not reviewed
 by a human and many hypotheses are apparently unprovable by the evidence
 we have gathered (i.e.\ the theoretical top accuracy is much lower
 than 1.0).  However, we released it to the public%
 %\footnote{redacted}
 \footnote{\url{https://github.com/brmson/dataset-sts} directory \texttt{data/hypev/ai2-8grade}}
-and included it in the comparison as these
+and still included it in the comparison as these
 qualities reflect many realistic datasets of unknown qualities, so
 we find relative performances of models on such datasets instructive.
 
@@ -271,40 +276,41 @@ to semantic parsing tasks that enforce a specific knowledge representation.
 The dataset consists of a set of 660 stories spanning
 multiple sentences, written in simple and clean language (but with less restricted
 vocabulary than e.g.\ the bAbI dataset \cite{bAbI}).  Each story is accompanied
-by four questions, each with four possible answers; the questions are tagged
+by four questions and each of these lists four possible answers; the questions are tagged
 as based on just \textit{one} in-story sentence, or requiring \textit{multiple} sentence inference.
 We use an official extension of the dataset for RTE evaluation
-that replaces answers by full statements that combine each answer with the question.
+%that replaces answers by full statements that combine each answer with the question.
+that again textually merges questions and answers.
 
 The dataset is split in two parts, MC-160 and MC-500, based on provenance but
 similar in quality.
 %We report performance on both parts separately to be comparable with earlier
 %work, as well as on a joined version MC-660 in order to increase evaluation
 %accuracy.
-We always train the model on a joined training set.
+We train all models on a joined training set.
 
 The practical setting differs from the Argus task as the MCTest dataset contains
-relatively restricted vocabulary and well-formed sentences; furthermore,
+relatively restricted vocabulary and well-formed sentences. Furthermore,
 the goal is to find the single key point in the story to focus on, while
-in the Argus setting we may have many pieces of evidence supporting an answer.
-Finally, a specific characteristics of MCTest is that it consists of stories
+in the Argus setting we may have many pieces of evidence supporting an answer;
+another specific characteristics of MCTest is that it consists of stories
 where the ordering and proximity of evidence sentences matters.
 
 
 \section{Related Work}
 \label{sec:relwork}
 
-Our primary concern when integrating natural language query and
-textual evidence is to build sentence-level representations that
-can be used both for relevance weighing and answer prediction.
+Our primary concern when integrating natural language query with
+textual evidence is to find sentence-level representations suitable
+both for relevance weighing and answer prediction.
 
 Sentence-level representations in the retrieval + inference context have been
 popularly proposed within the Memory Network framework \cite{MemNN},
-but just averaged word embeddings are explored; the task includes
+but explored just in the form of averaged word embeddings; the task includes
 only very simple sentences and a small vocabulary.
 Much more realistic setting is introduced in the Answer Sentence Selection
 context \cite{AnsselWang} \cite{sps}, with state-of-art models using complex
-deep neural architectures with attention \cite{attnpooling}, but ths selection
+deep neural architectures with attention \cite{attnpooling}, but the selection
 task consists of only retrieval and no inference (answer prediction).
 A more indirect retrieval task regarding news summarization was investigated
 by \cite{AttSum}.
@@ -312,18 +318,18 @@ by \cite{AttSum}.
 In the entailment context, \cite{SNLI} introduced a large dataset
 with single-evidence sentence pairs (Stanford Natural Language Inference, SNLI),
 but a larger vocabulary and
-slightly more complicated (but still conservatively formed) sentences
+slightly more complicated (but still conservatively formed) sentences.
 They also proposed baseline recurrent neural model for modeling
 sentence representations, while word-level attention based models
-are studied more recently \cite{SNLIattn} \cite{LSTMMR}.
+are being studied more recently \cite{SNLIattn} \cite{LSTMMR}.
 
 %TODO SICK-2014
 
 In the MCTest text comprehension challenge \cite{MCTest}, the
-best models use complex feature engineering ensembling multiple traditional
-semantic NLP approaches \cite{MCWang}, while the best deep model so far
-of \cite{HABCNN} uses convolutional neural networks to build sentence
-representations, and attention on multiple levels to select evidencing
+leading models use complex engineered features ensembling multiple traditional
+semantic NLP approaches \cite{MCWang}. The best deep model so far
+\cite{HABCNN} uses convolutional neural networks for sentence
+representations, and attention on multiple levels to pick evidencing
 sentences.
 
 \section{Neural Model}
@@ -333,35 +339,34 @@ Our approach is to use a sequence of word embeddings to build
 sentence embeddings for each hypothesis and respective evidence,
 then use the sentence embeddings to estimate relevance and
 entailment of each evidence with regard to the respective
-hypothesis, and integrate the evidence by different strategies.
+hypothesis, and finally integrate the evidence to a single answer.
 
 \subsection{Sentence Embeddings}
 
-To produce sentence embeddings, we investigated the usage
-of neural models of the \texttt{dataset-sts} framework
+To produce sentence embeddings, we investigated the
+neural models proposed in the \texttt{da\-ta\-set-sts} framework
 for deep learning of sentence pair scoring functions. \cite{sps}
 
 We refer the reader to \cite{sps} and its references for detailed
 model descriptions.  We evaluate an \textbf{RNN} model which uses bidirectionally
 summed GRU memory cells \cite{GRU} and uses the final states as embeddings;
 a \textbf{CNN} model which uses sentence-max-pooled convolutional filters as embeddings \cite{KimMultichannelCNN};
-a \textbf{RNN-CNN} model which puts the CNN on top of per-token GRU outputs
+an \textbf{RNN-CNN} model which puts the CNN on top of per-token GRU outputs
 rather than the word embeddings \cite{attn1511}; and an \textbf{attn1511} model
 inspired by \cite{attn1511} that integrates the RNN-CNN model
 with per-word attention to build hypothesis-specific evidence embeddings.
 We also report the baseline results of
 \textbf{avg} mean of word embeddings in the sentence with projection matrix
 and \textbf{DAN} Deep Averaging Network model that employs word-level dropout
-and adds multiple nonlinear transformations on top of the averaged sentence
-emebddings \cite{DAN}.
+and adds multiple nonlinear transformations on top of the averaged embeddings \cite{DAN}.
 
 The original \textbf{attn1511} model \cite{sps} (as tuned for the Answer Sentence Selection task)
-used a softmax attention mechanism that effectively selects only a few key words
-of the sentence to focus on --- for a hypothesis-evidence token $t$ scalar attention score $a_{h,e}(t)$,
+used a softmax attention mechanism that would effectively select only a few key words
+of the evidence to focus on --- for a hypothesis-evidence token $t$ scalar attention score $a_{h,e}(t)$,
 the focus $s_{h,e}(t)$ is:
 $$ s_{h,e}(t) = \exp(a_{h,e}(t)) / \sum_{t'} \exp(a_{h,e}(t')) $$
-A different focus mechanism exhibited better performance in the Hypothesis Evaluation task
-that models per-token attention more independently:
+A different focus mechanism exhibited better performance in the Hypothesis Evaluation task,
+modelling per-token attention more independently:
 $$ s_{h,e}(t) = \sigma(a_{h,e}(t)) / \max_{t'} \sigma(a_{h,e}(t')) $$
 We also use relu instead of tanh as the CNN transfer function.
 
@@ -370,12 +375,12 @@ extended with binary inputs denoting token type and overlap with token or bigram
 as described in \cite{sps}.
 However, we introduce two changes to the word
 embedding model --- we use 50-dimensional embeddings instead of 300-dimensional,
-and rather than building an adaptable embedding matrix only from the
+and rather than building an adaptable embedding matrix from the
 training set words preinitialized by GloVe, we use only the top 100
 most frequent tokens in the adaptable embedding matrix and use
 fixed GloVe vectors for all other tokens (including tokens not
-found in the training set).  This should improve behavior for highly
-vocabulary-rich tasks like Argus, while still allowing the high-frequency
+found in the training set).  In preliminary experiments, this improved generalization
+for highly vocabulary-rich tasks like Argus, while still allowing the high-frequency
 tokens (like interpunction or conjunctions) to learn semantic operator representations.
 
 As an additional method for producing sentence embeddings, we consider
@@ -399,7 +404,7 @@ we produce two $[0,1]$
 predictions using a pair of MLP point-scorers of \texttt{dataset-sts} \cite{sps}%
 \footnote{From the elementwise product
 and sum of the embeddings, a linear classifier directly produces a prediction;
-contrary to typical setup, we use no hidden layer.}
+contrary to the typical setup, we use no hidden layer.}
 with sigmoid activation function.  The predictions are interpreted as $C_i \in [0,1]$
 entailment (0 to 1 as \textit{no} to \textit{yes}) and relevance $R_i \in [0,1]$.
 To integrate the predictions across multiple pieces of evidence,
@@ -420,7 +425,7 @@ on the mean prediction across available evidence.
 
 Finally, following success reported in the Answer Sentence Selection task \cite{sps},
 we consider a \textbf{BM25 Feature} combined with Evidence Averaging,
-where the MLP scorer producing the pair scalar prediction as above has
+where the MLP scorer that produces the pair scalar prediction as above takes
 an additional BM25 word overlap score input \cite{BM25} besides the elementwise
 embedding comparisons.
 
@@ -602,6 +607,7 @@ Attn. Reader & & $0.481$ & $0.447$ & $0.463$ & $0.444$ & $0.395$ & $0.419$ \\
 Neur. Reasoner & & $0.484$ & $0.468$ & $0.476$ & $0.457$ & $0.456$ & $0.456$ \\
 HABCNN-TE & & $0.633$ & \textbf{0.629} & \textbf{0.631} & $0.542$ & \textbf{0.517} & $0.529$ \\
 \hline
+\hline
 avg & $0.577$ & $0.653$ & $0.471$ & $0.556$ & $0.587$ & $0.506$ & \textbf{0.542}\\
  & $\quad^{\pm0.009}$ & $\quad^{\pm0.027}$ & $\quad^{\pm0.020}$ & $\quad^{\pm0.012}$ & $\quad^{\pm0.018}$ & $\quad^{\pm0.010}$ & $\quad^{\pm0.011}$\\
 DAN & $0.590$ & $0.681$ & $0.486$ & $0.577$ & \textbf{0.636} & $0.496$ & \textbf{0.560}\\
@@ -670,16 +676,16 @@ Our proposed transfer model is statistically equivalent to the best model on bot
 confidence intervals, even though their models should also be stochastically initialized).
 
 As expected, our models did badly on the multiple-evidence class of questions
---- we made no attempt to model information flow across adjacent evidence in our
-models since this aspect is unique to the MCTest task in the
-context of this work.
+--- we made no attempt to model information flow across adjacent sentences in our
+models as this aspect is unique to MCTest in the
+context of our work.
 
 % TODO: train on one-type only
 
-Interestingly, on the MCTest task evidence weighing does play an important role
+Interestingly, evidence weighing does play an important role on the MCTest task
 as shown in Fig.~\ref{tab:mctestev},
 significantly boosting model accuracy.
-This confirms that a way to allocate attention to different sentences
+This confirms that a mechanism to allocate attention to different sentences
 is indeed crucial for this task.
 
 \subsection{Analysis}
@@ -703,21 +709,21 @@ of negation --- recurrent model that can capture long-term dependencies
 and alter sentence representations based on the presence of negation
 may represent an essential improvement over an n-gram-like convolutional
 scheme.
-The lack of success of evidence weighing in the Argus task might be also
-attributed to a more conservative scheme of passage retrieval employed
+We might also attribute the lack of success of evidence weighing in the Argus task al
+to a more conservative scheme of passage retrieval employed
 in the IR pipeline that produced the dataset.
 
-We see from training versus test accuracies that RNN-based
+We see from the training vs.\ test accuracies that RNN-based
 models (including the word-level attention model) have a strong tendency
 to overfit on our small datasets, while CNN is much more resilient.
 While word-level attention seems appealing for such a task,
 we speculate that we simply might not have enough training data to
 properly train it.%
 \footnote{Just reducing the dimensionality of hidden representations did not yield an improvement.}
-Investigating attention transfer is a point for future work --- our
-preliminary experiments on multiple datasets indicate that attention
-models are more task specific than the recurrent text comprehension models
-of memory cell based RNNs.
+Investigating attention transfer is a point for future work --- by our
+preliminary experiments on multiple datasets, attention
+models appear more task specific than the basic text comprehension models
+of memory based RNNs.
 
 
 % TODO error analysis (mainly team X beats Y vs.\ team Y beats X)
@@ -756,8 +762,8 @@ architectures trained only on the dataset of the task at hand.%
 of the HABCNN models that were trained to also predict question classes.}
 
 Finally, on the MCTest dataset, our best proposed model is better
-of statistically
-indistinguishable from the best neural network model reported so far
+or statistically
+indistinguishable from the best neural model reported so far
 \cite{HABCNN},
 even though it has a simpler architecture and only a naive attention
 mechanism.
@@ -783,10 +789,11 @@ models and processing of all the evaluated datasets as open source.%
 %\footnote{redacted}
 
 We believe the next step towards machine comprehension NLP models
-that are based on deep learning but capable of dealing with real-world,
-large-vocabulary data will involve research into a better way to deal with
-entities without available embeddings, as mentioned in the analysis above.
-In the realm of embeddings, simple word-level attention mechanisms will not do.
+(based on deep learning but capable of dealing with real-world,
+large-vocabulary data) will involve research into a better way to deal with
+entities without available embeddings. %, as mentioned in the analysis above.
+When distinguishing specific entities,
+simple word-level attention mechanisms will not do.
 A promising approach could extend
 the flexibility of the final sentence representation, moving from attention mechanism
 to a memory mechanism\footnote{Not necessarily ``memories'' in the sense of Memory Networks.}
