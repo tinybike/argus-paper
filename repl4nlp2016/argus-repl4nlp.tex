@@ -9,6 +9,7 @@
 \usepackage{latexsym}
 \usepackage{amsfonts}
 \usepackage{url}
+\usepackage{adjustbox}
 
 \aclfinalcopy % Uncomment this line for the final submission
 %\def\aclpaperid{***} %  Enter the acl Paper ID here
@@ -216,7 +217,8 @@ For the final dataset, we kept only questions where at least
 a single evidence was found (i.e.\ we successfuly assigned a role
 to each token, found some news stories and found at least one
 sentence with 2/3 of question keywords within).  The final size
-of the dataset is outlined in Fig.~\ref{tab:dataset}.
+of the dataset is outlined in Fig.~\ref{tab:dataset} and some
+examples are shown in Fig.~\ref{ex:argus}.
 
 \begin{figure}
 	\centering
@@ -238,6 +240,45 @@ of the dataset is outlined in Fig.~\ref{tab:dataset}.
 
 % TODO: example
 
+\begin{figure*}
+	\begin{tabular}{|l|}
+		\hline
+	\textbf{Will Andre Iguodala win NBA Finals MVP in 2015?} \\
+		Should Andre Iguodala have won the NBA Finals MVP award over LeBron James? \\
+		12.12am ET   Andre Iguodala was named NBA Finals MVP, not LeBron. \\
+	\hline
+	\textbf{Will Donald Trump run for President in 2016?} \\
+		Donald Trump released “Immigration Reform that will make America Great Again” last weekend --- \\ \dots his first, detailed position paper since announcing his campaign for the Republican nomination \\ \dots for president. \\
+		The Fix: A brief history of Donald Trump blaming everything on President Obama \\
+		DONALD TRUMP FOR PRESIDENT OF PLUTO! \\
+	\hline
+	\end{tabular}
+	\vspace*{-0.2cm}
+	\caption{\footnotesize%
+		Example pairs in the Argus dataset.
+	}
+	\label{ex:argus}
+\end{figure*}
+
+\begin{figure*}
+	\begin{tabular}{|l|}
+		\hline
+	\textbf{\textit{pedigree chart model} is used to show the pattern of traits that are passed from one generation} \\ \textbf{to the next in a family?} \\
+		A pedigree is a chart which shows the inheritance of a trait over several generations. \\
+		Figure 51.14 In a pedigree, squares symbolize males, and circles represent females. \\
+		\hline
+	\textbf{\textit{energy pyramid model} is used to show the pattern of traits that are passed from one generation} \\ \textbf{to the next in a family?} \\
+		Energy is passed up a food chain or web from lower to higher trophic levels. \\
+		Each step of the food chain in the energy pyramid is called a trophic level. \\
+		\hline
+	\end{tabular}
+	\vspace*{-0.2cm}
+	\caption{\footnotesize%
+		Example pairs in the AI2-8grade/CK12 dataset.
+		Answer texts substituted to a question are shown in italics.
+	}
+	\label{ex:ai2}
+\end{figure*}
 
 \subsection{AI2-8grade/CK12 Dataset}
 
@@ -254,7 +295,8 @@ substituting the \textit{wh}-word in the question by each answer) and retrieved
 evidence sentences for each hypothesis using Solr search in a collection
 of CK-12 ``Concepts B'' textbooks.%
 \footnote{We have also tried English Wikipedia, but the dataset is much harder.}
-525 questions attained any supporting evidence.
+525 questions attained any supporting evidence,
+examples are shown in Fig.~\ref{ex:ai2}.
 
 We consider this dataset as \textit{preliminary} since it was not reviewed
 by a human and many hypotheses are apparently unprovable by the evidence
@@ -368,7 +410,7 @@ $$ s_{h,e}(t) = \exp(a_{h,e}(t)) / \sum_{t'} \exp(a_{h,e}(t')) $$
 A different focus mechanism exhibited better performance in the Hypothesis Evaluation task,
 modelling per-token attention more independently:
 $$ s_{h,e}(t) = \sigma(a_{h,e}(t)) / \max_{t'} \sigma(a_{h,e}(t')) $$
-We also use relu instead of tanh as the CNN transfer function.
+We also use relu instead of tanh in the CNNs.
 
 As model input, we use the standard GloVe embeddings \cite{GloVe}
 extended with binary inputs denoting token type and overlap with token or bigram in the paired sentence,
@@ -447,7 +489,7 @@ question accuracy%
 \footnote{In the MCTest and AI2-8grade/CK12 datasets, we test and rank four
 	hypotheses per question, whereas in the Argus dataset, each
 	hypothesis is a single question.}
-as determined by average accuracy in 16-way independent training runs
+as determined by average accuracy in 16 independent trainings
 and with 95\% confidence intervals based on the Student's
 t-distribution.
 
@@ -518,9 +560,12 @@ Ubu.\ RNN & $0.847$ & $0.831$ & $0.852$\\
 In Fig.~\ref{tab:argus}, we report the model performance on the Argus task,
 showing that the Ubuntu Dialogue transfer RNN outperforms other proposed
 models by a large margin.  However, a comparison of evidence integration
-approaches in Fig.~\ref{tab:argusev} shows that contrary to our expectations,
+approaches in Fig.~\ref{tab:argusev} shows that
 evidence integration is not the major deciding factor and there are no
 staticially meaningful differences between the evaluated approaches.
+We measured high correlation between classification and relevance scores
+with Pearson's $r = 0.803$, showing that our model does not learn a separate
+evidence weighing function on this task.
 
 \begin{figure}[t]
 \centering
@@ -663,7 +708,8 @@ Ubu.\ RNN & $0.507$ & $0.509$ & \textbf{0.538}\\
 \label{tab:mctestev}
 \end{figure}
 
-In Fig.~\ref{tab:mctest}, we compare our proposed models with the current state-of-art
+For the MCTest dataset,
+Fig.~\ref{tab:mctest} compares our proposed models with the current state-of-art
 ensemble of hand-crafted syntactic and frame-semantic features \cite{MCWang},
 as well as past neural models
 from the literature, all using attention mechanisms --- the Attentive Reader of \cite{ReadComprehend},
@@ -709,9 +755,11 @@ of negation --- recurrent model that can capture long-term dependencies
 and alter sentence representations based on the presence of negation
 may represent an essential improvement over an n-gram-like convolutional
 scheme.
-We might also attribute the lack of success of evidence weighing in the Argus task al
+We might also attribute the lack of success of evidence weighing in the Argus task
 to a more conservative scheme of passage retrieval employed
 in the IR pipeline that produced the dataset.
+Given the large vocabulary and noise levels in the data, we may also simply
+require more data to train the evidence weighing properly.
 
 We see from the training vs.\ test accuracies that RNN-based
 models (including the word-level attention model) have a strong tendency
